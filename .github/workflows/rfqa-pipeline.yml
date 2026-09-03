@@ -7,10 +7,12 @@ on:
         description: "Repo owner"
         required: true
         type: string
+
       repo:
-        description: "Repo name"
+        description: "Acceptance criteria repo name"
         required: true
         type: string
+
       issue_number:
         description: "Issue number (must already be labeled RFQA / Ready for QA)"
         required: true
@@ -22,49 +24,132 @@ jobs:
     runs-on: ubuntu-latest
 
     env:
+      # GitHub authentication
       GITHUB_TOKEN: ${{ secrets.GH_PAT }}
-      GITHUB_OWNER: ${{ github.event.inputs.owner }}
-      GITHUB_REPO: ${{ github.event.inputs.repo }}
-      ISSUE_NUMBER: ${{ github.event.inputs.issue_number }}
+
+      # Target acceptance-criteria repository
+      GITHUB_OWNER: ${{ inputs.owner }}
+      GITHUB_REPO: ${{ inputs.repo }}
+      ISSUE_NUMBER: ${{ inputs.issue_number }}
+
+      # Application under test
       APP_BASE_URL: ${{ vars.APP_BASE_URL }}
+
+      # Claude authentication
       ANTHROPIC_API_KEY: ${{ secrets.ANTHROPIC_API_KEY }}
 
     steps:
-      - name: Checkout repository
+
+      # --------------------------------------------------
+      # 1. Checkout automation repository
+      # --------------------------------------------------
+      - name: Checkout automation repository
         uses: actions/checkout@v4
 
+      # --------------------------------------------------
+      # 2. Setup Node.js
+      # --------------------------------------------------
       - name: Setup Node.js
         uses: actions/setup-node@v4
         with:
           node-version: 20
           cache: npm
 
+      # --------------------------------------------------
+      # 3. Install project dependencies
+      # --------------------------------------------------
       - name: Install dependencies
         run: npm ci
 
+      # --------------------------------------------------
+      # 4. Install Playwright browser
+      # --------------------------------------------------
       - name: Install Playwright browsers
         run: npx playwright install --with-deps chromium
 
+      # --------------------------------------------------
+      # 5. Install Claude Code CLI
+      # --------------------------------------------------
       - name: Install Claude Code CLI
         run: npm install -g @anthropic-ai/claude-code
 
-      - name: Run gitReaderAgent -> testPlannerAgent -> testGeneratorAgent
+      # --------------------------------------------------
+      # 6. Run autonomous QA pipeline
+      # --------------------------------------------------
+      - name: Run Autonomous QA Agents
         run: |
-          claude -p "Run gitReaderAgent for ${GITHUB_OWNER}/${GITHUB_REPO}#${ISSUE_NUMBER} to write plan.md, then run testPlannerAgent to write SCENARIOS.md from plan.md, then run testGeneratorAgent to generate and run the Playwright tests from SCENARIOS.md. Finally, post a short PASS/FAIL summary as a comment on the issue." \
+          claude -p "
+          Execute the autonomous QA pipeline for:
+
+          Repository: ${GITHUB_OWNER}/${GITHUB_REPO}
+          Issue: #${ISSUE_NUMBER}
+          Application URL: ${APP_BASE_URL}
+
+          Follow this sequence:
+
+          1. Run gitReaderAgent.
+             - Read the specified GitHub issue.
+             - Verify that it is ready for QA / RFQA.
+             - Extract the acceptance criteria and relevant requirements.
+             - Write the result to plan.md.
+
+          2. Run testPlannerAgent.
+             - Read plan.md.
+             - Create detailed test scenarios.
+             - Write the scenarios to SCENARIOS.md.
+
+          3. Run testGeneratorAgent.
+             - Read SCENARIOS.md.
+             - Generate the required Playwright tests following the existing project framework and coding conventions.
+             - Do not unnecessarily modify existing framework code.
+
+          4. Execute the generated Playwright tests.
+
+          5. Analyze the test results.
+
+          6. Post a concise PASS/FAIL summary as a comment on the original GitHub issue in ${GITHUB_OWNER}/${GITHUB_REPO}.
+
+          7. Preserve generated files, Playwright reports, screenshots, traces, and other test artifacts.
+
+          Do not stop after planning or test generation. Complete the entire pipeline.
+          " \
             --permission-mode acceptEdits
 
+      # --------------------------------------------------
+      # 7. Upload Playwright report
+      # --------------------------------------------------
       - name: Upload Playwright report
         if: always()
         uses: actions/upload-artifact@v4
         with:
           name: playwright-report
           path: playwright-report/
+          if-no-files-found: ignore
           retention-days: 14
 
+      # --------------------------------------------------
+      # 8. Upload Allure results
+      # --------------------------------------------------
       - name: Upload Allure results
         if: always()
         uses: actions/upload-artifact@v4
         with:
           name: allure-results
           path: allure-results/
+          if-no-files-found: ignore
+          retention-days: 14
+
+      # --------------------------------------------------
+      # 9. Upload generated QA files
+      # --------------------------------------------------
+      - name: Upload generated QA artifacts
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: autonomous-qa-output
+          path: |
+            plan.md
+            SCENARIOS.md
+            tests/
+          if-no-files-found: ignore
           retention-days: 14

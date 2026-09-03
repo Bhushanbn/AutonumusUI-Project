@@ -1,6 +1,6 @@
 import { test, expect } from "@playwright/test";
-import { LoginPage } from "../pages/LoginPage";
-import { ProductsPage } from "../pages/ProductsPage";
+import { LoginPage } from "../pages/LoginPage.js";
+import { ProductsPage } from "../pages/ProductsPage.js";
 
 test.describe("AC1: Valid login", () => {
   test("AC1-S1: Successful login with valid credentials navigates to the products page", async ({

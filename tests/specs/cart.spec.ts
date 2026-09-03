@@ -1,7 +1,7 @@
 import { test, expect } from "@playwright/test";
-import { LoginPage } from "../pages/LoginPage";
-import { ProductsPage } from "../pages/ProductsPage";
-import { CartPage } from "../pages/CartPage";
+import { LoginPage } from "../pages/LoginPage.js";
+import { ProductsPage } from "../pages/ProductsPage.js";
+import { CartPage } from "../pages/CartPage.js";
 
 const PRODUCT_NAME = "Sauce Labs Backpack";
 
