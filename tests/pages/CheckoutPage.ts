@@ -1,4 +1,4 @@
-import type { Locator, Page } from "@playwright/test";
+import { Page, Locator, expect } from "@playwright/test";
 
 export class CheckoutPage {
   readonly page: Page;
@@ -7,11 +7,8 @@ export class CheckoutPage {
   readonly postalCodeInput: Locator;
   readonly continueButton: Locator;
   readonly finishButton: Locator;
-  readonly errorMessage: Locator;
-  readonly summaryItems: Locator;
   readonly completeHeader: Locator;
-  readonly completeText: Locator;
-  readonly ponyExpressImage: Locator;
+  readonly cartList: Locator;
 
   constructor(page: Page) {
     this.page = page;
@@ -20,38 +17,38 @@ export class CheckoutPage {
     this.postalCodeInput = page.getByPlaceholder("Zip/Postal Code");
     this.continueButton = page.getByRole("button", { name: "Continue" });
     this.finishButton = page.getByRole("button", { name: "Finish" });
-    this.errorMessage = page.getByTestId("error");
-    this.summaryItems = page.locator(".cart_item");
-    this.completeHeader = page.getByText("Thank you for your order!");
-    this.completeText = page.getByText(
-      "Your order has been dispatched, and will arrive just as fast as the pony can get there!"
-    );
-    this.ponyExpressImage = page.getByAltText("Pony Express");
+    this.completeHeader = page.locator(".complete-header");
+    this.cartList = page.locator(".cart_list");
   }
 
-  async fillInformation(
-    firstName: string,
-    lastName: string,
-    postalCode: string
-  ): Promise<void> {
+  async fillInformation(firstName: string, lastName: string, postalCode: string) {
     await this.firstNameInput.fill(firstName);
     await this.lastNameInput.fill(lastName);
     await this.postalCodeInput.fill(postalCode);
   }
 
-  async continueToOverview(): Promise<void> {
+  async continueToOverview() {
     await this.continueButton.click();
   }
 
-  async finish(): Promise<void> {
+  async expectOverviewDisplayed() {
+    await expect(this.page).toHaveURL(/checkout-step-two\.html/);
+  }
+
+  productInSummary(productName: string): Locator {
+    return this.cartList.locator(".cart_item", { hasText: productName });
+  }
+
+  async finish() {
     await this.finishButton.click();
   }
 
-  itemInSummary(productName: string): Locator {
-    return this.summaryItems.filter({ hasText: productName });
+  async expectConfirmationDisplayed() {
+    await expect(this.page).toHaveURL(/checkout-complete\.html/);
+    await expect(this.completeHeader).toBeVisible();
   }
 
-  async getErrorText(): Promise<string | null> {
-    return this.errorMessage.textContent();
+  async getConfirmationText(): Promise<string> {
+    return (await this.completeHeader.textContent()) ?? "";
   }
 }

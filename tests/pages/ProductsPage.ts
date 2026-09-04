@@ -1,43 +1,49 @@
-import type { Locator, Page } from "@playwright/test";
+import { Page, Locator, expect } from "@playwright/test";
 
 export class ProductsPage {
   readonly page: Page;
-  readonly title: Locator;
-  readonly inventoryItems: Locator;
+  readonly pageTitle: Locator;
   readonly cartBadge: Locator;
   readonly cartLink: Locator;
 
   constructor(page: Page) {
     this.page = page;
-    this.title = page.getByText("Products", { exact: true });
-    this.inventoryItems = page.locator(".inventory_item");
+    this.pageTitle = page.locator(".title", { hasText: "Products" });
     this.cartBadge = page.getByTestId("shopping-cart-badge");
     this.cartLink = page.getByTestId("shopping-cart-link");
   }
 
-  productAddToCartButton(productName: string): Locator {
-    return this.page
-      .locator(".inventory_item")
-      .filter({ hasText: productName })
-      .getByRole("button", { name: "Add to cart" });
+  async expectDisplayed() {
+    await expect(this.page).toHaveURL(/inventory\.html/);
+    await expect(this.pageTitle).toBeVisible();
+    await expect(this.pageTitle).toHaveText("Products");
   }
 
-  productRemoveButton(productName: string): Locator {
-    return this.page
-      .locator(".inventory_item")
-      .filter({ hasText: productName })
-      .getByRole("button", { name: "Remove" });
+  private productItem(productName: string): Locator {
+    return this.page.locator(".inventory_item", { hasText: productName });
   }
 
-  async addProductToCart(productName: string): Promise<void> {
-    await this.productAddToCartButton(productName).click();
+  addToCartButton(productName: string): Locator {
+    return this.productItem(productName).getByRole("button", { name: "Add to cart" });
   }
 
-  async getCartBadgeCount(): Promise<string | null> {
-    return this.cartBadge.textContent();
+  removeButton(productName: string): Locator {
+    return this.productItem(productName).getByRole("button", { name: "Remove" });
   }
 
-  async openCart(): Promise<void> {
+  async addProductToCart(productName: string) {
+    await this.addToCartButton(productName).click();
+  }
+
+  async getCartBadgeCount(): Promise<string> {
+    return (await this.cartBadge.textContent()) ?? "";
+  }
+
+  async isCartBadgeVisible(): Promise<boolean> {
+    return this.cartBadge.isVisible();
+  }
+
+  async goToCart() {
     await this.cartLink.click();
   }
 }

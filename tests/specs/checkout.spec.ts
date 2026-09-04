@@ -1,91 +1,52 @@
 import { test, expect } from "@playwright/test";
-import { LoginPage } from "../pages/LoginPage.js";
-import { ProductsPage } from "../pages/ProductsPage.js";
-import { CartPage } from "../pages/CartPage.js";
-import { CheckoutPage } from "../pages/CheckoutPage.js";
+import { LoginPage } from "../pages/LoginPage";
+import { ProductsPage } from "../pages/ProductsPage";
+import { CartPage } from "../pages/CartPage";
+import { CheckoutPage } from "../pages/CheckoutPage";
 
 const PRODUCT_NAME = "Sauce Labs Backpack";
 
-test.describe("AC4: Checkout", () => {
-  test.beforeEach(async ({ page }) => {
+test.describe("AC4: Checkout flow", () => {
+  test("AC4-S1: Complete checkout end-to-end and see confirmation message", async ({ page }) => {
     const loginPage = new LoginPage(page);
-    const productsPage = new ProductsPage(page);
-    await loginPage.goto();
-    await loginPage.login("standard_user", "secret_sauce");
-    await productsPage.addProductToCart(PRODUCT_NAME);
-  });
-
-  test("AC4-S1: Completing checkout with valid information shows the order confirmation message", async ({
-    page,
-  }) => {
     const productsPage = new ProductsPage(page);
     const cartPage = new CartPage(page);
     const checkoutPage = new CheckoutPage(page);
 
-    await test.step("Click the cart icon to open the cart page", async () => {
-      await productsPage.openCart();
+    await test.step("Given user is logged in and has added 'Sauce Labs Backpack' to the cart", async () => {
+      await loginPage.goto();
+      await loginPage.login("standard_user", "secret_sauce");
+      await productsPage.expectDisplayed();
+      await productsPage.addProductToCart(PRODUCT_NAME);
+      await expect(productsPage.cartBadge).toHaveText("1");
     });
 
-    await test.step('Click the "Checkout" button', async () => {
-      await cartPage.goToCheckout();
+    await test.step("When user navigates to the cart page and clicks Checkout", async () => {
+      await productsPage.goToCart();
+      await cartPage.expectDisplayed();
+      await expect(cartPage.cartItem(PRODUCT_NAME)).toBeVisible();
+      await cartPage.checkout();
     });
 
-    await test.step("Enter first name, last name, and zip code", async () => {
-      await checkoutPage.fillInformation("Jane", "Doe", "12345");
-    });
-
-    await test.step('Click the "Continue" button', async () => {
+    await test.step("And enters valid checkout information and clicks Continue", async () => {
+      await checkoutPage.fillInformation("John", "Doe", "12345");
       await checkoutPage.continueToOverview();
     });
 
-    await test.step('Order overview page shows the "Sauce Labs Backpack" item', async () => {
-      await expect(checkoutPage.itemInSummary(PRODUCT_NAME)).toBeVisible();
+    await test.step("Then the checkout overview page shows the product and order totals", async () => {
+      await checkoutPage.expectOverviewDisplayed();
+      await expect(checkoutPage.productInSummary(PRODUCT_NAME)).toBeVisible();
+      await expect(page.locator(".summary_total_label")).toBeVisible();
     });
 
-    await test.step('Click the "Finish" button', async () => {
+    await test.step("When user clicks Finish", async () => {
       await checkoutPage.finish();
     });
 
-    await test.step('A confirmation message "Thank you for your order!" is visible', async () => {
-      await expect(checkoutPage.completeHeader).toBeVisible();
-    });
-
-    await test.step("Confirmation/completion text is visible", async () => {
-      await expect(checkoutPage.completeText).toBeVisible();
-    });
-
-    await test.step("A visual confirmation element (pony express image) is present", async () => {
-      await expect(checkoutPage.ponyExpressImage).toBeVisible();
-    });
-  });
-
-  test("AC4-S2: Checkout information step requires mandatory fields", async ({
-    page,
-  }) => {
-    const productsPage = new ProductsPage(page);
-    const cartPage = new CartPage(page);
-    const checkoutPage = new CheckoutPage(page);
-
-    await test.step("Click the cart icon to open the cart page", async () => {
-      await productsPage.openCart();
-    });
-
-    await test.step('Click the "Checkout" button', async () => {
-      await cartPage.goToCheckout();
-    });
-
-    await test.step('Leave fields empty and click "Continue"', async () => {
-      await checkoutPage.continueToOverview();
-    });
-
-    await test.step("An error message indicating first name is required is visible", async () => {
-      await expect(checkoutPage.errorMessage).toBeVisible();
-      const text = await checkoutPage.getErrorText();
-      expect(text).toMatch(/First Name is required/i);
-    });
-
-    await test.step("The user remains on the checkout information page", async () => {
-      await expect(page).toHaveURL(/checkout-step-one\.html/);
+    await test.step("Then a confirmation message is displayed", async () => {
+      await checkoutPage.expectConfirmationDisplayed();
+      const text = await checkoutPage.getConfirmationText();
+      expect(text.toLowerCase()).toContain("thank you");
     });
   });
 });

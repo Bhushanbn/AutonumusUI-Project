@@ -1,4 +1,4 @@
-import { expect, type Locator, type Page } from "@playwright/test";
+import { Page, Locator, expect } from "@playwright/test";
 
 export class LoginPage {
   readonly page: Page;
@@ -15,11 +15,11 @@ export class LoginPage {
     this.errorMessage = page.getByTestId("error");
   }
 
-  async goto(): Promise<void> {
+  async goto() {
     await this.page.goto("/");
   }
 
-  async login(username: string, password: string): Promise<void> {
+  async login(username: string, password: string) {
     await this.usernameInput.fill(username);
     await this.passwordInput.fill(password);
     await this.loginButton.click();
@@ -29,11 +29,16 @@ export class LoginPage {
     return this.errorMessage.isVisible();
   }
 
-  async getErrorText(): Promise<string | null> {
-    return this.errorMessage.textContent();
+  async getErrorText(): Promise<string> {
+    return (await this.errorMessage.textContent()) ?? "";
   }
 
   async isOnLoginPage(): Promise<boolean> {
     return this.loginButton.isVisible();
+  }
+
+  async expectStillOnLoginPage() {
+    await expect(this.page).toHaveURL(/saucedemo\.com\/?$/);
+    await expect(this.loginButton).toBeVisible();
   }
 }

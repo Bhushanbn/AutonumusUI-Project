@@ -18,6 +18,12 @@ on:
         required: true
         type: string
 
+  # Fired by a workflow in the acceptance-criteria repo (e.g. GitRepo_Acceptance-Criteria)
+  # when an issue there is labeled RFQA / Ready for QA — see README/PIPELINE.md for the
+  # sender workflow that needs to live in that other repo.
+  repository_dispatch:
+    types: [rfqa-ready]
+
 jobs:
   run-pipeline:
     name: Run Autonomous QA
@@ -28,9 +34,9 @@ jobs:
       GITHUB_TOKEN: ${{ secrets.GH_PAT }}
 
       # Target acceptance-criteria repository
-      GITHUB_OWNER: ${{ inputs.owner }}
-      GITHUB_REPO: ${{ inputs.repo }}
-      ISSUE_NUMBER: ${{ inputs.issue_number }}
+      GITHUB_OWNER: ${{ inputs.owner || github.event.client_payload.owner }}
+      GITHUB_REPO: ${{ inputs.repo || github.event.client_payload.repo }}
+      ISSUE_NUMBER: ${{ inputs.issue_number || github.event.client_payload.issue_number }}
 
       # Application under test
       APP_BASE_URL: ${{ vars.APP_BASE_URL }}
