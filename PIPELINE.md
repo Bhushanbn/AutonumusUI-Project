@@ -100,47 +100,93 @@ GitHub Issue (label: RFQA / "Ready for QA")
 | [playwright.config.ts](playwright.config.ts) | `testDir: tests/specs`, chromium only, trace/screenshot/video on failure, `allure-playwright` reporter, `baseURL` from `APP_BASE_URL` (defaults to saucedemo.com) |
 | `.env` (not committed) | Supplies `GITHUB_TOKEN` and friends to `src/config.ts` |
 
-## Why you weren't able to trigger the workflow automatically
+## Automatic trigger — cross-repo label → Actions dispatch (current design)
 
-There is currently **no automatic trigger wired up anywhere** — everything
-here only runs because a person types a prompt that happens to match an
-agent's `description` trigger phrases. Concretely:
+The Acceptance Criteria issues live in a **separate** repo,
+`Bhushanbn/GitRepo_Acceptance-Criteria`, while this pipeline lives in
+`Bhushanbn/Autonomous_UI_Test`. A GitHub Actions event trigger (`issues:
+labeled`, etc.) only fires within the repo hosting the workflow file, so a
+single workflow can't listen across repos directly — the automatic path
+needs two cooperating workflows and a `repository_dispatch` bridge between
+them:
 
-1. **No hooks configured.** `.claude/settings.json` / `settings.local.json`
-   don't exist in this project. Claude Code hooks are the only mechanism that
-   lets the harness itself react to events (a file save, a git action, a
-   session start) without a human prompting — none are defined, so nothing
-   fires on its own.
-2. **No scheduled/cron job.** There's no `CronCreate`-based routine or `/loop`
-   set up to periodically poll GitHub for issues that just became RFQA. The
-   pipeline is purely reactive to being asked.
-3. **No GitHub webhook / CI integration.** Nothing in this repo (no GitHub
-   Actions workflow, no webhook receiver) listens for the issue's label or
-   Project Status changing to "Ready for QA" and kicks off Claude Code from
-   the outside. `src/mcp/githubClient.ts` only *reads* issues on demand — it's
-   never invoked by an external event.
-4. **Agents only self-select on matching prose, and only when directly
-   invoked.** Claude Code picks a subagent when your prompt's wording matches
-   its `description` (e.g. "read the RFQA issue"), but that matching happens
-   per-conversation-turn, initiated by you — subagents don't wake themselves
-   up, watch the filesystem, or watch GitHub in the background.
-5. **The Projects-board Status field genuinely isn't queryable.** Even if you
-   did wire up polling, the hosted GitHub MCP server's default toolset (used
-   by `githubClient.ts`) has no Projects v2 tools, so "card moved to Ready for
-   QA on the board" can't be detected at all through this code path — only an
-   issue *label* can. So even an automatic trigger would need to be
-   label-based (e.g. a GitHub Action on `issues: labeled`) rather than
-   Status-field-based, unless someone adds a local `github-mcp-server` run
-   with the `projects` toolset enabled and new project-item calls in
-   `githubClient.ts`.
+```
+GitRepo_Acceptance-Criteria                    Autonomous_UI_Test (this repo)
+──────────────────────────                     ──────────────────────────────
+Issue labeled RFQA/Ready for QA
+        │
+        ▼
+notify-rfqa.yml  (on: issues.labeled)
+  - filters on label name
+  - repository-dispatch call  ────────────►   rfqa-pipeline.yml
+                                               (on: repository_dispatch,
+                                                types: [rfqa-ready])
+                                                      │
+                                                      ▼
+                                               reads owner/repo/issue_number
+                                               from client_payload, runs the
+                                               full 3-agent pipeline + tests
+                                               + posts PASS/FAIL comment back
+                                               on the original issue
+```
 
-**In short:** the three agents form a real, working pipeline, but the wiring
-between "issue becomes RFQA" and "pipeline runs" doesn't exist yet — every
-stage still needs a human (or an external trigger you'd have to build, e.g. a
-GitHub Action calling out to Claude Code, or a Claude Code hook/cron polling
-`listRfqaIssues`) to say "go."
+**This repo's side — [.github/workflows/rfqa-pipeline.yml](.github/workflows/rfqa-pipeline.yml) — is implemented:**
+- Triggers on `workflow_dispatch` (manual, with `owner`/`repo`/`issue_number`
+  inputs) **or** `repository_dispatch` with type `rfqa-ready`.
+- `GITHUB_OWNER` / `GITHUB_REPO` / `ISSUE_NUMBER` resolve from
+  `inputs.*` when manually dispatched, falling back to
+  `github.event.client_payload.*` when dispatched externally.
+- The job itself is unchanged: install deps → install Playwright + Claude
+  Code CLI → run one `claude -p` prompt that drives `gitReaderAgent` →
+  `testPlannerAgent` → `testGeneratorAgent` → runs the generated tests →
+  posts a PASS/FAIL comment on the original issue → uploads
+  Playwright/Allure/generated-file artifacts.
 
-## Manual run sequence (today)
+**The other repo's side is NOT yet in place — this is why labeling issue
+[#1](https://github.com/Bhushanbn/GitRepo_Acceptance-Criteria/issues/1)
+today does nothing.** `GitRepo_Acceptance-Criteria` needs:
+1. A new workflow file `.github/workflows/notify-rfqa.yml` on its default
+   branch:
+   ```yaml
+   name: Notify RFQA Pipeline
+
+   on:
+     issues:
+       types: [labeled]
+
+   jobs:
+     dispatch:
+       runs-on: ubuntu-latest
+       if: contains(fromJSON('["rfqa", "RFQA", "ready for qa", "Ready for QA"]'), github.event.label.name)
+       steps:
+         - name: Trigger pipeline in automation repo
+           uses: peter-evans/repository-dispatch@v3
+           with:
+             token: ${{ secrets.PIPELINE_DISPATCH_TOKEN }}
+             repository: Bhushanbn/Autonomous_UI_Test
+             event-type: rfqa-ready
+             client-payload: '{"owner": "${{ github.repository_owner }}", "repo": "${{ github.event.repository.name }}", "issue_number": "${{ github.event.issue.number }}"}'
+   ```
+2. A repo secret `PIPELINE_DISPATCH_TOKEN` in `GitRepo_Acceptance-Criteria`
+   (Settings → Secrets and variables → Actions) — a PAT (classic, scopes
+   `repo` + `workflow`, or fine-grained with Actions:write on
+   `Autonomous_UI_Test`). The default auto-injected `GITHUB_TOKEN` cannot be
+   used here since it has no permission to dispatch into a different repo.
+
+Once both exist: labeling an issue `RFQA`/`Ready for QA` in
+`GitRepo_Acceptance-Criteria` → `notify-rfqa.yml` runs there → dispatches to
+`Autonomous_UI_Test` → `rfqa-pipeline.yml` runs the full pipeline
+automatically, no human prompt required.
+
+**Residual limitation (unchanged):** this whole path is label-based, because
+the hosted GitHub MCP server used by `src/mcp/githubClient.ts` has no
+Projects v2 toolset — a Projects-board "Status" column move (with no
+matching label) still can't be detected by anything in this repo. That would
+require a `projects_v2_item` webhook + GitHub App instead, which is unbuilt
+(see the reserved-but-unused `GITHUB_WEBHOOK_SECRET`/`WEBHOOK_PORT` vars in
+`.env.example`).
+
+## Manual run sequence (still works, and is the fallback if the automatic path isn't wired up)
 
 ```
 1. Use gitReaderAgent to read GitHub issue #<n> and write its acceptance criteria into plan.md
@@ -149,14 +195,6 @@ GitHub Action calling out to Claude Code, or a Claude Code hook/cron polling
 4. npx playwright test
 5. npx allure generate ./allure-results --clean -o ./allure-report && npx allure open ./allure-report
 ```
-
-## What would need to be added for real automation
-
-- A GitHub Action on `issues.labeled` (label = `RFQA`/`Ready for QA`) that
-  invokes Claude Code headlessly (or posts to a webhook you host) passing the
-  issue number — replacing "a human types the Stage 1 prompt."
-- Or a Claude Code **cron/scheduled routine** (`CronCreate`, or the `schedule`
-  skill) that periodically calls `listRfqaIssues` and, for any new one, drives
-  Stages 1–3 in sequence.
-- Either way, Stage 2 and 3 already chain cleanly off Stage 1's file outputs,
-  so only the "what starts Stage 1" gap needs closing.
+Or dispatch [.github/workflows/rfqa-pipeline.yml](.github/workflows/rfqa-pipeline.yml)
+manually from the Actions tab with `owner`/`repo`/`issue_number` inputs —
+this works today regardless of whether `notify-rfqa.yml` exists yet.

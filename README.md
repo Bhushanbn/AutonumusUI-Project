@@ -1,112 +1,194 @@
 # Autonomous UI Test
 
-An agent-driven QA pipeline: a GitHub issue labeled "Ready for QA" is turned
-into Acceptance Criteria → test scenarios → generated Playwright tests →
-executed results, with each stage handled by a dedicated Claude Code
-subagent. See [PIPELINE.md](PIPELINE.md) for the full architecture and
-current automation gaps; this file covers setup and a file-by-file reference.
+An agent-driven QA pipeline that turns a GitHub issue (labeled **RFQA** /
+**Ready for QA**) into executed, evidenced Playwright tests — without a human
+writing test code by hand. Three Claude Code subagents run in sequence, each
+producing a plain file the next stage consumes:
 
-## Setup
-
-### Prerequisites
-- Node.js 20+
-- A GitHub personal access token with `repo` (and, ideally, project) read scope
-- [Claude Code](https://claude.com/claude-code) installed, for running the agents interactively or via `claude -p` in CI
-
-### Install
-```bash
-npm install
-npx playwright install --with-deps chromium
+```
+GitHub Issue (label: RFQA / "Ready for QA")
+        │  gitReaderAgent
+        ▼
+   plan.md                 (Acceptance Criteria, verbatim)
+        │  testPlannerAgent
+        ▼
+   SCENARIOS.md             (concrete test scenarios)
+        │  testGeneratorAgent
+        ▼
+   tests/pages/*.ts + tests/specs/*.spec.ts   (Playwright Page Objects + specs)
+        │  npx playwright test
+        ▼
+   test-results/, allure-results/, evidence/   (pass/fail + evidence)
 ```
 
-### Configure environment
-Copy the example env file and fill in real values:
-```bash
-cp .env.example .env
-```
+For the deep-dive on how each stage works internally, the GitHub MCP
+integration, and the cross-repo automatic-trigger design, see
+[PIPELINE.md](PIPELINE.md). This README focuses on **setting the project up
+from scratch** and **what every file does**.
 
-| Variable | Required | Purpose |
-|---|---|---|
-| `GITHUB_TOKEN` | yes | Bearer token for GitHub's hosted MCP server (`issue_read`, `list_issues`) |
-| `GITHUB_MCP_URL` | no | Override the MCP endpoint (defaults to `https://api.githubcopilot.com/mcp/`) |
-| `GITHUB_OWNER` / `GITHUB_REPO` | no | Default repo to pull acceptance-criteria issues from |
-| `GITHUB_RFQA_STATUS` | no | Label text that marks an issue ready for QA (default `Ready for QA`) |
-| `GITHUB_PROJECT_NUMBER` | no | Kept for reference; not currently used — the hosted MCP server has no Projects v2 toolset |
-| `GITHUB_WEBHOOK_SECRET` / `WEBHOOK_PORT` | no | Reserved for a planned real-time webhook trigger (`projects_v2_item` events) — **no receiver is implemented yet**, see PIPELINE.md |
-| `APP_BASE_URL` | no | The app under test; also read by `playwright.config.ts` |
+## Prerequisites
 
-`src/config.ts` throws immediately if `GITHUB_TOKEN` is missing, so any
-agent step that talks to GitHub will fail fast with a clear error if `.env`
-isn't set up.
+- [Node.js](https://nodejs.org/) 20+ and npm
+- A GitHub **personal access token** with `repo` scope (used to read issues
+  via the hosted GitHub MCP server)
+- [Claude Code CLI](https://docs.claude.com/en/docs/claude-code) if you want
+  to run the subagents locally (`npm install -g @anthropic-ai/claude-code`),
+  or Claude Code as this IDE extension
+- A running/reachable instance of the app under test (defaults to the public
+  demo site [saucedemo.com](https://www.saucedemo.com), no setup needed)
 
-### Running the pipeline
-Manually, inside a Claude Code session:
-```
-1. "Use gitReaderAgent to read GitHub issue #<n> and write its acceptance criteria into plan.md"
-2. "Use testPlannerAgent to generate test scenarios from plan.md into SCENARIOS.md"
-3. "Use testGeneratorAgent to generate and run tests from SCENARIOS.md"
-```
-Or headlessly via the checked-in GitHub Actions workflow — see
-[.github/workflows/rfqa-pipeline.yml](.github/workflows/rfqa-pipeline.yml),
-triggered manually (`workflow_dispatch`) with `owner`, `repo`, and
-`issue_number` inputs.
+## Setup from scratch
 
-Once specs exist, you can also just run Playwright directly:
-```bash
-npx playwright test
-npx allure generate ./allure-results --clean -o ./allure-report
-npx allure open ./allure-report
-```
+1. **Clone and install dependencies**
+   ```bash
+   git clone <this-repo-url>
+   cd Autonomous_UI_Test
+   npm install
+   ```
 
-## File-by-file reference
+2. **Install the Playwright browser binaries** (only Chromium is configured):
+   ```bash
+   npx playwright install --with-deps chromium
+   ```
+
+3. **Create your `.env` file** from the template and fill in the values:
+   ```bash
+   cp .env.example .env
+   ```
+   Required:
+   - `GITHUB_TOKEN` — PAT with `repo` scope, used to authenticate to the
+     hosted GitHub MCP server (`https://api.githubcopilot.com/mcp/`).
+
+   Optional (defaults shown are already sensible for the sample app):
+   - `GITHUB_MCP_URL` — override the MCP endpoint.
+   - `GITHUB_OWNER` / `GITHUB_REPO` — default owner/repo to read issues from
+     (defaults to `Bhushanbn/GitRepo_Acceptance-Criteria`).
+   - `GITHUB_RFQA_STATUS` — the label text that marks an issue ready for QA
+     (default `Ready for QA`).
+   - `GITHUB_PROJECT_NUMBER` — reserved for a future Projects-v2-aware MCP
+     server; unused today.
+   - `GITHUB_WEBHOOK_SECRET` / `WEBHOOK_PORT` — reserved for a future
+     real-time webhook trigger; unused today.
+   - `APP_BASE_URL` — the app under test's base URL (default
+     `https://www.saucedemo.com`).
+
+4. **(Optional) Set up the automatic GitHub → CI trigger.** The pipeline can
+   also run in GitHub Actions ([.github/workflows/rfqa-pipeline.yml](.github/workflows/rfqa-pipeline.yml)),
+   triggered manually or via a `repository_dispatch` from a second workflow
+   living in the acceptance-criteria repo. See "Automatic trigger" in
+   [PIPELINE.md](PIPELINE.md) for the exact companion workflow and secrets
+   needed. This step is optional — the manual sequence below always works.
+
+5. **Run the pipeline manually** (from Claude Code, in this repo):
+   ```
+   1. Use gitReaderAgent to read GitHub issue #<n> and write its acceptance criteria into plan.md
+   2. Use testPlannerAgent to generate test scenarios from plan.md into SCENARIOS.md
+   3. Use testGeneratorAgent to generate and run tests from SCENARIOS.md
+   ```
+   Or, once `tests/specs/*.spec.ts` files exist, run them directly:
+   ```bash
+   npx playwright test
+   ```
+
+6. **View reports.** Playwright's own HTML report is generated after a test
+   run; for the Allure report:
+   ```bash
+   npx allure generate ./allure-results --clean -o ./allure-report
+   npx allure open ./allure-report
+   ```
+
+## Project structure — every file explained
 
 ### Root
-| File | Necessity | Function |
-|---|---|---|
-| `package.json` | required | Dependencies (`@playwright/test`, `@modelcontextprotocol/sdk`, `@anthropic-ai/sdk`, `allure-playwright`, `dotenv`, TypeScript tooling) |
-| `package-lock.json` | required | Locked dependency versions |
-| `tsconfig.json` | required | TypeScript compiler options for `src/` (strict mode, ESNext/NodeNext modules) |
-| `playwright.config.ts` | required | Playwright Test config: spec dir `tests/specs`, chromium project, `baseURL` from `APP_BASE_URL`, trace/screenshot/video on failure, `allure-playwright` reporter |
-| `.env` | required (gitignored) | Actual secrets/config values, loaded by `dotenv` via `src/config.ts` |
-| `.env.example` | reference | Documents every env var the project reads, with defaults/comments |
-| `.gitignore` | required | Excludes `node_modules/`, `.env`, `dist/`, `evidence/*`, `allure-results/`, `allure-report/` from version control |
-| `plan.md` | generated | Stage 1 output — Acceptance Criteria extracted from the GitHub issue (overwritten each run) |
-| `SCENARIOS.md` | generated | Stage 2 output — concrete test scenarios derived from `plan.md` (overwritten each run) |
-| `PIPELINE.md` | reference | Deep-dive on the pipeline architecture and why it isn't triggered automatically today |
-| `README.md` | reference | This file |
 
-### `src/` — pipeline plumbing (used by the agents, not by hand)
-| File | Necessity | Function |
-|---|---|---|
-| `src/config.ts` | required | Central typed config object; reads all env vars, throws early if `GITHUB_TOKEN` is missing |
-| `src/types.ts` | required | Shared `RfqaIssue` type (owner/repo/number/title/url/body/status) |
-| `src/mcp/githubClient.ts` | required | MCP client over Streamable HTTP to GitHub's hosted MCP server. Exposes `getIssue`, `listRfqaIssues` (label-based RFQA detection only — no Projects v2 support), `parseIssueUrlParam` (decodes a Projects-board URL's `issue=Owner\|Repo\|Number` param), `closeGithubClient`. Used exclusively by `gitReaderAgent` |
-| `src/mcp/playwrightMcpClient.ts` | planned, currently empty | Intended as an MCP-based browser client for `testGeneratorAgent` to use beyond stock Playwright; not implemented — the agent falls back to plain `@playwright/test` |
-| `src/reporting/evidenceLogger.ts` | planned, currently empty | Intended to attach extra screenshots/traces per test step to `evidence/`; not implemented |
-| `src/reporting/reportBuilder.ts` | planned, currently empty | Intended to post-process `allure-results/` into a custom report; not implemented — use `npx allure generate` directly instead |
+| File | Purpose |
+|---|---|
+| [package.json](package.json) | Project manifest. ESM (`"type": "module"`). Dependencies: `@anthropic-ai/sdk`, `@modelcontextprotocol/sdk` (GitHub MCP client), `@playwright/test`, `dotenv`. Dev dependencies: `@playwright/mcp`, `allure-playwright`/`allure-commandline` (reporting), `tsx` (run TS files directly), `typescript`. |
+| [package-lock.json](package-lock.json) | npm's locked dependency tree — do not edit by hand. |
+| [tsconfig.json](tsconfig.json) | TypeScript compiler config: ESNext/NodeNext modules, strict mode on, no build output configured (files are run via `tsx`, not compiled to `dist/`). |
+| [playwright.config.ts](playwright.config.ts) | Playwright test runner config: tests live in `tests/specs`, Chromium only, trace/screenshot/video captured on failure, `allure-playwright` + `list` reporters, `baseURL` read from `APP_BASE_URL` env var. |
+| [.env](.env) | Your local secrets/config (git-ignored). Not committed — created by you from `.env.example`. |
+| [.env.example](.env.example) | Template documenting every environment variable the project reads (see Setup step 3 above). |
+| [.gitignore](.gitignore) | Excludes `node_modules/`, `.env`, Playwright/Allure output directories' contents, etc. |
+| [plan.md](plan.md) | **Generated output** of Stage 1 (`gitReaderAgent`) — the current GitHub issue's Acceptance Criteria, overwritten on each run. Committed here as a working example. |
+| [SCENARIOS.md](SCENARIOS.md) | **Generated output** of Stage 2 (`testPlannerAgent`) — concrete test scenarios derived from `plan.md`, overwritten on each run. Committed here as a working example. |
+| [PIPELINE.md](PIPELINE.md) | Detailed architecture doc: how each agent stage works, the GitHub MCP integration and its limitations, and the cross-repo automatic-trigger design. |
+| [README.md](README.md) | This file. |
 
-### `.claude/agents/` — the three pipeline stages
-| File | Necessity | Function |
-|---|---|---|
-| `gitReaderAgent.md` | required | Stage 1: finds the RFQA issue (by number, by Projects-board URL, or by scanning labels), extracts Acceptance Criteria verbatim, writes `plan.md`. Never fabricates criteria if the API call fails |
-| `testPlannerAgent.md` | required | Stage 2: reads `plan.md`, maps every Acceptance Criterion to one or more concrete scenarios (`ACn-Sm`) described by role/label/text (not selectors), writes `SCENARIOS.md`. Refuses to run if `plan.md` has no Acceptance Criteria section |
-| `testGeneratorAgent.md` | required | Stage 3: reads `SCENARIOS.md`, generates Playwright Page Objects (`tests/pages/`) and specs (`tests/specs/`), runs them, iterates on script-level failures (bad locators, race conditions), reports genuine app-behavior mismatches as real FAILs rather than patching around them. Refuses to run if `SCENARIOS.md` is missing |
+### `.claude/agents/` — the three pipeline subagents
+
+Each `.md` file is a Claude Code subagent definition (frontmatter + system
+prompt) invoked by name from a Claude Code session.
+
+| File | Role |
+|---|---|
+| [gitReaderAgent.md](.claude/agents/gitReaderAgent.md) | Stage 1. Reads a GitHub issue via `src/mcp/githubClient.ts` and writes its Acceptance Criteria verbatim into `plan.md`. Tools: Read, Write, Bash, Grep, Glob (no direct network access — shells out via `npx tsx`). |
+| [testPlannerAgent.md](.claude/agents/testPlannerAgent.md) | Stage 2. Reads `plan.md`'s Acceptance Criteria and expands each into one or more concrete scenarios (`ACn-Sm` IDs) written to `SCENARIOS.md`. Pure text transformation — no Bash/network tools. Refuses to run if `plan.md` has no Acceptance Criteria section yet. |
+| [testGeneratorAgent.md](.claude/agents/testGeneratorAgent.md) | Stage 3. Reads `SCENARIOS.md`, generates Playwright Page Objects (`tests/pages/`) and spec files (`tests/specs/`), runs them, and iterates on failures within a bounded retry budget before reporting a blocker. Refuses to run if `SCENARIOS.md` is missing. |
+
+### `src/` — supporting TypeScript code
+
+| File | Purpose |
+|---|---|
+| [src/config.ts](src/config.ts) | Central, env-driven config object read by everything else. Throws immediately if `GITHUB_TOKEN` is missing. Exposes `config.github.*` and `config.app.baseUrl`. |
+| [src/types.ts](src/types.ts) | Shared TypeScript types — currently just `RfqaIssue` (owner/repo/number/title/url/body/status), the shape `gitReaderAgent` writes into `plan.md`. |
+| [src/mcp/githubClient.ts](src/mcp/githubClient.ts) | Hand-rolled MCP client connecting over Streamable HTTP to GitHub's hosted MCP server. Exposes `getIssue(owner, repo, number)`, `listRfqaIssues(owner, repo)` (filters open issues by an RFQA/"Ready for QA" label), and `parseIssueUrlParam()` (decodes a Projects-board URL's `issue=Owner\|Repo\|Number` param). Called via `npx tsx` from `gitReaderAgent`. |
+| [src/mcp/playwrightMcpClient.ts](src/mcp/playwrightMcpClient.ts) | **Empty stub.** Reserved for an optional Playwright MCP client integration for Stage 3; not currently used — `testGeneratorAgent` falls back to plain `@playwright/test`. |
+| [src/reporting/evidenceLogger.ts](src/reporting/evidenceLogger.ts) | **Empty stub.** Reserved for attaching extra evidence (screenshots/traces) to `evidence/` beyond what `@playwright/test` already captures; not currently used. |
+| [src/reporting/reportBuilder.ts](src/reporting/reportBuilder.ts) | **Empty stub.** Reserved for programmatically driving Allure report generation instead of the manual `npx allure generate` command; not currently used. |
+
+### `tests/` — generated Playwright test suite
+
+Everything here is generated (and re-generated) by `testGeneratorAgent`, but
+is committed as a working example against saucedemo.com.
+
+| File | Purpose |
+|---|---|
+| [tests/pages/LoginPage.ts](tests/pages/LoginPage.ts) | Page Object for the login screen — locators (username/password/login button/error message) and actions (`goto`, `login`, error-state checks), using Playwright's accessible/`getByTestId` locators rather than CSS/XPath. |
+| [tests/pages/ProductsPage.ts](tests/pages/ProductsPage.ts) | Page Object for the products/inventory listing page (e.g. add-to-cart actions, cart badge). |
+| [tests/pages/CartPage.ts](tests/pages/CartPage.ts) | Page Object for the cart page. |
+| [tests/pages/CheckoutPage.ts](tests/pages/CheckoutPage.ts) | Page Object for the checkout form + overview + confirmation steps. |
+| [tests/specs/login.spec.ts](tests/specs/login.spec.ts) | Spec file covering AC1/AC2 scenarios from `SCENARIOS.md` (valid login, invalid login, empty credentials). |
+| [tests/specs/cart.spec.ts](tests/specs/cart.spec.ts) | Spec file covering AC3 (add product to cart). |
+| [tests/specs/checkout.spec.ts](tests/specs/checkout.spec.ts) | Spec file covering AC4 (end-to-end checkout + confirmation). |
 
 ### `.github/workflows/`
-| File | Necessity | Function |
-|---|---|---|
-| `rfqa-pipeline.yml` | optional (CI path) | Manually-dispatched (`workflow_dispatch`) GitHub Action that runs the entire pipeline headlessly: installs deps + Playwright + Claude Code CLI, then drives all three agents via a single `claude -p` prompt, runs the generated tests, posts a PASS/FAIL summary as a GitHub issue comment, and uploads the Playwright report / Allure results / generated `plan.md`, `SCENARIOS.md`, `tests/` as artifacts. Not triggered by any GitHub event today — see PIPELINE.md for what would make it fully automatic |
 
-### `tests/`
-| Path | Necessity | Function |
-|---|---|---|
-| `tests/specs/*.spec.ts` | generated | Playwright test files, one per Acceptance Criteria group, produced by `testGeneratorAgent` |
-| `tests/pages/*.ts` (created on first generation) | generated | Page Object classes backing the specs, reused/extended across runs rather than duplicated |
+| File | Purpose |
+|---|---|
+| [rfqa-pipeline.yml](.github/workflows/rfqa-pipeline.yml) | GitHub Actions workflow that runs the full pipeline in CI. Triggers on manual `workflow_dispatch` (with `owner`/`repo`/`issue_number` inputs) or on a `repository_dispatch` event of type `rfqa-ready` sent from a companion workflow in the acceptance-criteria repo. Installs dependencies, Playwright, and the Claude Code CLI, then runs one `claude -p` prompt driving all three agents end-to-end, runs the tests, posts a PASS/FAIL comment on the source issue, and uploads the Playwright/Allure/generated-file artifacts. |
 
-### Output directories (gitignored, created by running tests)
-| Path | Necessity | Function |
-|---|---|---|
-| `test-results/` | generated | Raw Playwright Test run output (traces, screenshots, videos on failure) |
-| `allure-results/` | generated | Raw Allure result files written by the `allure-playwright` reporter |
-| `allure-report/` | generated | Rendered HTML report from `npx allure generate` |
-| `evidence/` | generated (currently unused) | Reserved for extra evidence attachments via `evidenceLogger.ts`, which isn't implemented yet |
+### Output/artifact directories (git-ignored contents, kept via `.gitkeep`)
+
+| Directory | Purpose |
+|---|---|
+| `test-results/` | Raw Playwright test-run output (traces, screenshots, videos on failure). `.last-run.json` tracks the most recent run for `--last-failed` reruns. |
+| `allure-results/` | Raw Allure result files written by the `allure-playwright` reporter; input to `npx allure generate`. |
+| `allure-report/` | Generated static Allure HTML report (output of `npx allure generate`). |
+| `evidence/` | Reserved output location for the (currently stubbed) `evidenceLogger.ts` to attach extra QA evidence. |
+
+## Environment variables reference
+
+See [.env.example](.env.example) for the authoritative list with inline
+comments; summarized:
+
+| Variable | Required | Default | Used by |
+|---|---|---|---|
+| `GITHUB_TOKEN` | Yes | — | `src/config.ts` / `src/mcp/githubClient.ts` |
+| `GITHUB_MCP_URL` | No | `https://api.githubcopilot.com/mcp/` | `src/mcp/githubClient.ts` |
+| `GITHUB_OWNER` | No | `Bhushanbn` | `gitReaderAgent` default target |
+| `GITHUB_REPO` | No | `GitRepo_Acceptance-Criteria` | `gitReaderAgent` default target |
+| `GITHUB_RFQA_STATUS` | No | `Ready for QA` | label match in `listRfqaIssues` |
+| `GITHUB_PROJECT_NUMBER` | No | `2` | reserved, unused |
+| `GITHUB_WEBHOOK_SECRET` / `WEBHOOK_PORT` | No | — | reserved, unused |
+| `APP_BASE_URL` | No | `https://www.saucedemo.com` | `playwright.config.ts` |
+
+## Known limitations
+
+- The hosted GitHub MCP server has no Projects (v2) toolset, so
+  `gitReaderAgent` can only detect "ready for QA" via an issue **label**, not
+  a Projects-board Status-column move. See [PIPELINE.md](PIPELINE.md) for
+  details and the workaround.
+- `src/mcp/playwrightMcpClient.ts`, `src/reporting/evidenceLogger.ts`, and
+  `src/reporting/reportBuilder.ts` are empty stubs — reserved extension
+  points, not wired into the pipeline yet.
