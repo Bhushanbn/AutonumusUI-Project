@@ -16,9 +16,10 @@ GitHub Issue (label: RFQA / "Ready for QA")
         │  testGeneratorAgent
         ▼
    tests/pages/*.ts + tests/specs/*.spec.ts   (Playwright Page Objects + specs)
-        │  npx playwright test
+        │  npm test
         ▼
-   test-results/, allure-results/, evidence/   (pass/fail + evidence)
+   test-results/, evidence/                    (pass/fail + evidence)
+   playwright-report/, allure-results/, allure-report/   (HTML reports, auto-built)
 ```
 
 For the deep-dive on how each stage works internally, the GitHub MCP
@@ -87,14 +88,18 @@ from scratch** and **what every file does**.
    ```
    Or, once `tests/specs/*.spec.ts` files exist, run them directly:
    ```bash
-   npx playwright test
+   npm test
    ```
+   `npm test` runs `node scripts/run-tests.mjs`, which runs Playwright and
+   then **always** regenerates the Allure HTML report afterward — even if
+   tests fail — so both reports are ready after every run without an extra
+   step.
 
-6. **View reports.** Playwright's own HTML report is generated after a test
-   run; for the Allure report:
+6. **View reports.**
    ```bash
-   npx allure generate ./allure-results --clean -o ./allure-report
-   npx allure open ./allure-report
+   npm run report:html    # opens Playwright's built-in HTML report
+   npm run report:open    # opens the generated Allure report
+   npm run report:generate  # (re)generates allure-report/ from allure-results/ on demand
    ```
 
 ## Project structure — every file explained
@@ -103,10 +108,11 @@ from scratch** and **what every file does**.
 
 | File | Purpose |
 |---|---|
-| [package.json](package.json) | Project manifest. ESM (`"type": "module"`). Dependencies: `@anthropic-ai/sdk`, `@modelcontextprotocol/sdk` (GitHub MCP client), `@playwright/test`, `dotenv`. Dev dependencies: `@playwright/mcp`, `allure-playwright`/`allure-commandline` (reporting), `tsx` (run TS files directly), `typescript`. |
+| [package.json](package.json) | Project manifest. ESM (`"type": "module"`). Dependencies: `@anthropic-ai/sdk`, `@modelcontextprotocol/sdk` (GitHub MCP client), `@playwright/test`, `dotenv`. Dev dependencies: `@playwright/mcp`, `allure-playwright`/`allure-commandline` (reporting), `tsx` (run TS files directly), `typescript`. Scripts: `test` (runs Playwright then always builds the Allure report, see `scripts/run-tests.mjs`), `report:generate`, `report:open` (Allure), `report:html` (Playwright's built-in report). |
 | [package-lock.json](package-lock.json) | npm's locked dependency tree — do not edit by hand. |
 | [tsconfig.json](tsconfig.json) | TypeScript compiler config: ESNext/NodeNext modules, strict mode on, no build output configured (files are run via `tsx`, not compiled to `dist/`). |
-| [playwright.config.ts](playwright.config.ts) | Playwright test runner config: tests live in `tests/specs`, Chromium only, trace/screenshot/video captured on failure, `allure-playwright` + `list` reporters, `baseURL` read from `APP_BASE_URL` env var. |
+| [playwright.config.ts](playwright.config.ts) | Playwright test runner config: tests live in `tests/specs`, Chromium only, trace/screenshot/video captured on failure, `baseURL` read from `APP_BASE_URL` env var. Three reporters: `list`, the built-in `html` reporter (→ `playwright-report/`), and `allure-playwright` (→ `allure-results/`). |
+| [scripts/run-tests.mjs](scripts/run-tests.mjs) | Runner invoked by `npm test`. Runs `playwright test`, then **always** runs `allure generate allure-results --clean -o allure-report` afterward regardless of test outcome, then exits with Playwright's original exit code (so CI still sees failures). |
 | [.env](.env) | Your local secrets/config (git-ignored). Not committed — created by you from `.env.example`. |
 | [.env.example](.env.example) | Template documenting every environment variable the project reads (see Setup step 3 above). |
 | [.gitignore](.gitignore) | Excludes `node_modules/`, `.env`, Playwright/Allure output directories' contents, etc. |
@@ -163,8 +169,9 @@ is committed as a working example against saucedemo.com.
 | Directory | Purpose |
 |---|---|
 | `test-results/` | Raw Playwright test-run output (traces, screenshots, videos on failure). `.last-run.json` tracks the most recent run for `--last-failed` reruns. |
-| `allure-results/` | Raw Allure result files written by the `allure-playwright` reporter; input to `npx allure generate`. |
-| `allure-report/` | Generated static Allure HTML report (output of `npx allure generate`). |
+| `playwright-report/` | Playwright's own static HTML report, regenerated on every `npm test` run. Open with `npm run report:html`. |
+| `allure-results/` | Raw Allure result files written by the `allure-playwright` reporter; input to `allure generate`. |
+| `allure-report/` | Generated static Allure HTML report, rebuilt after every `npm test` run by `scripts/run-tests.mjs` (or on demand via `npm run report:generate`). Open with `npm run report:open`. |
 | `evidence/` | Reserved output location for the (currently stubbed) `evidenceLogger.ts` to attach extra QA evidence. |
 
 ## Environment variables reference
