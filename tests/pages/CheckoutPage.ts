@@ -43,9 +43,12 @@ export class CheckoutPage {
     await this.finishButton.click();
   }
 
-  async expectConfirmationDisplayed() {
+  async expectConfirmationDisplayed(expectedText?: string) {
     await expect(this.page).toHaveURL(/checkout-complete\.html/);
     await expect(this.completeHeader).toBeVisible();
+    if (expectedText) {
+      await expect(this.completeHeader).toHaveText(expectedText);
+    }
   }
 
   async getConfirmationText(): Promise<string> {

@@ -1,0 +1,345 @@
+{
+  "config": {
+    "argv": [
+      "C:\\Program Files\\nodejs\\node.exe",
+      "C:\\Users\\Admin\\IdeaProjects\\New folder\\Autonomous_UI_Test\\node_modules\\@playwright\\test\\cli.js",
+      "test"
+    ],
+    "configFile": "C:\\Users\\Admin\\IdeaProjects\\New folder\\Autonomous_UI_Test\\playwright.config.ts",
+    "rootDir": "C:/Users/Admin/IdeaProjects/New folder/Autonomous_UI_Test/tests/specs",
+    "failOnFlakyTests": false,
+    "forbidOnly": false,
+    "fullyParallel": true,
+    "globalSetup": null,
+    "globalTeardown": null,
+    "globalTimeout": 0,
+    "grep": {},
+    "grepInvert": null,
+    "maxFailures": 0,
+    "metadata": {
+      "actualWorkers": 4
+    },
+    "preserveOutput": "always",
+    "projects": [
+      {
+        "outputDir": "C:/Users/Admin/IdeaProjects/New folder/Autonomous_UI_Test/test-results",
+        "repeatEach": 1,
+        "retries": 0,
+        "metadata": {
+          "actualWorkers": 4
+        },
+        "id": "chromium",
+        "name": "chromium",
+        "testDir": "C:/Users/Admin/IdeaProjects/New folder/Autonomous_UI_Test/tests/specs",
+        "testIgnore": [],
+        "testMatch": [
+          "**/*.@(spec|test).?(c|m)[jt]s?(x)"
+        ],
+        "timeout": 30000
+      }
+    ],
+    "quiet": false,
+    "reporter": [
+      [
+        "list",
+        null
+      ],
+      [
+        "html",
+        {
+          "outputFolder": "playwright-report",
+          "open": "never"
+        }
+      ],
+      [
+        "C:\\Users\\Admin\\IdeaProjects\\New folder\\Autonomous_UI_Test\\node_modules\\allure-playwright\\dist\\cjs\\index.js",
+        {
+          "resultsDir": "allure-results"
+        }
+      ],
+      [
+        "json",
+        {
+          "outputFile": "test-results/results.json"
+        }
+      ]
+    ],
+    "reportSlowTests": {
+      "max": 5,
+      "threshold": 300000
+    },
+    "shard": null,
+    "tags": [],
+    "updateSnapshots": "missing",
+    "updateSourceMethod": "patch",
+    "version": "1.62.1",
+    "workers": 6,
+    "webServer": null
+  },
+  "suites": [
+    {
+      "title": "cart.spec.ts",
+      "file": "cart.spec.ts",
+      "column": 0,
+      "line": 0,
+      "specs": [],
+      "suites": [
+        {
+          "title": "Cart Flow",
+          "file": "cart.spec.ts",
+          "line": 5,
+          "column": 6,
+          "specs": [
+            {
+              "title": "AC3-S1: Add \"Sauce Labs Backpack\" to cart from the products page",
+              "ok": true,
+              "tags": [],
+              "tests": [
+                {
+                  "timeout": 30000,
+                  "annotations": [],
+                  "expectedStatus": "passed",
+                  "projectId": "chromium",
+                  "projectName": "chromium",
+                  "results": [
+                    {
+                      "workerIndex": 0,
+                      "parallelIndex": 0,
+                      "status": "passed",
+                      "duration": 5217,
+                      "errors": [],
+                      "stdout": [],
+                      "stderr": [],
+                      "retry": 0,
+                      "steps": [
+                        {
+                          "title": "Preconditions: Log in and navigate to products page",
+                          "duration": 4315
+                        },
+                        {
+                          "title": "Click \"Add to cart\" for \"Sauce Labs Backpack\"",
+                          "duration": 77
+                        },
+                        {
+                          "title": "Verify cart badge displays \"1\" and button changes to \"Remove\"",
+                          "duration": 55
+                        }
+                      ],
+                      "startTime": "2026-09-15T09:45:12.392Z",
+                      "annotations": [],
+                      "attachments": []
+                    }
+                  ],
+                  "status": "expected"
+                }
+              ],
+              "id": "1981448f0b79506fb670-efb697b88a7b211ef95d",
+              "file": "cart.spec.ts",
+              "line": 6,
+              "column": 3
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "title": "checkout.spec.ts",
+      "file": "checkout.spec.ts",
+      "column": 0,
+      "line": 0,
+      "specs": [],
+      "suites": [
+        {
+          "title": "Checkout Flow",
+          "file": "checkout.spec.ts",
+          "line": 7,
+          "column": 6,
+          "specs": [
+            {
+              "title": "AC4-S1: Complete checkout process for item in cart",
+              "ok": true,
+              "tags": [],
+              "tests": [
+                {
+                  "timeout": 30000,
+                  "annotations": [],
+                  "expectedStatus": "passed",
+                  "projectId": "chromium",
+                  "projectName": "chromium",
+                  "results": [
+                    {
+                      "workerIndex": 1,
+                      "parallelIndex": 1,
+                      "status": "passed",
+                      "duration": 5558,
+                      "errors": [],
+                      "stdout": [],
+                      "stderr": [],
+                      "retry": 0,
+                      "steps": [
+                        {
+                          "title": "Preconditions: Log in and add \"Sauce Labs Backpack\" to cart",
+                          "duration": 4445
+                        },
+                        {
+                          "title": "Click shopping cart icon to view cart",
+                          "duration": 112
+                        },
+                        {
+                          "title": "Click \"Checkout\" button",
+                          "duration": 90
+                        },
+                        {
+                          "title": "Enter customer info and click Continue",
+                          "duration": 238
+                        },
+                        {
+                          "title": "Click \"Finish\" button on checkout overview page",
+                          "duration": 78
+                        },
+                        {
+                          "title": "Verify order confirmation header is displayed",
+                          "duration": 37
+                        }
+                      ],
+                      "startTime": "2026-09-15T09:45:12.393Z",
+                      "annotations": [],
+                      "attachments": []
+                    }
+                  ],
+                  "status": "expected"
+                }
+              ],
+              "id": "25ab1bfc84c57e3e3a45-add34601e447f963b7eb",
+              "file": "checkout.spec.ts",
+              "line": 8,
+              "column": 3
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "title": "login.spec.ts",
+      "file": "login.spec.ts",
+      "column": 0,
+      "line": 0,
+      "specs": [],
+      "suites": [
+        {
+          "title": "Login Flow",
+          "file": "login.spec.ts",
+          "line": 5,
+          "column": 6,
+          "specs": [
+            {
+              "title": "AC1-S1: Log in successfully with valid credentials",
+              "ok": true,
+              "tags": [],
+              "tests": [
+                {
+                  "timeout": 30000,
+                  "annotations": [],
+                  "expectedStatus": "passed",
+                  "projectId": "chromium",
+                  "projectName": "chromium",
+                  "results": [
+                    {
+                      "workerIndex": 2,
+                      "parallelIndex": 2,
+                      "status": "passed",
+                      "duration": 5119,
+                      "errors": [],
+                      "stdout": [],
+                      "stderr": [],
+                      "retry": 0,
+                      "steps": [
+                        {
+                          "title": "Navigate to the login page",
+                          "duration": 3468
+                        },
+                        {
+                          "title": "Enter valid username, password and click Login",
+                          "duration": 639
+                        },
+                        {
+                          "title": "Verify redirection to the Products page",
+                          "duration": 258
+                        }
+                      ],
+                      "startTime": "2026-09-15T09:45:12.427Z",
+                      "annotations": [],
+                      "attachments": []
+                    }
+                  ],
+                  "status": "expected"
+                }
+              ],
+              "id": "41d3fd2474a19feb00a1-9df88954d4ba17fd794f",
+              "file": "login.spec.ts",
+              "line": 6,
+              "column": 3
+            },
+            {
+              "title": "AC2-S1: Attempt login with invalid credentials",
+              "ok": true,
+              "tags": [],
+              "tests": [
+                {
+                  "timeout": 30000,
+                  "annotations": [],
+                  "expectedStatus": "passed",
+                  "projectId": "chromium",
+                  "projectName": "chromium",
+                  "results": [
+                    {
+                      "workerIndex": 3,
+                      "parallelIndex": 3,
+                      "status": "passed",
+                      "duration": 5016,
+                      "errors": [],
+                      "stdout": [],
+                      "stderr": [],
+                      "retry": 0,
+                      "steps": [
+                        {
+                          "title": "Navigate to the login page",
+                          "duration": 3469
+                        },
+                        {
+                          "title": "Enter invalid username, password and click Login",
+                          "duration": 654
+                        },
+                        {
+                          "title": "Verify error message is displayed and user remains on login page",
+                          "duration": 114
+                        }
+                      ],
+                      "startTime": "2026-09-15T09:45:12.346Z",
+                      "annotations": [],
+                      "attachments": []
+                    }
+                  ],
+                  "status": "expected"
+                }
+              ],
+              "id": "41d3fd2474a19feb00a1-92ee2edcdde8753c2c63",
+              "file": "login.spec.ts",
+              "line": 23,
+              "column": 3
+            }
+          ]
+        }
+      ]
+    }
+  ],
+  "errors": [],
+  "stats": {
+    "startTime": "2026-09-15T09:45:11.683Z",
+    "duration": 6705.07,
+    "expected": 4,
+    "skipped": 0,
+    "unexpected": 0,
+    "flaky": 0
+  }
+}

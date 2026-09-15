@@ -1,8 +1,8 @@
 # Plan: Add to cart & checkout flow (#1)
 
-- Source: https://github.com/Bhushanbn/GitRepo_Acceptance-Criteria/issues/1
+- Source: undefined
 - QA Status: Ready for QA
-- Ingested: 2026-09-05
+- Ingested: 2026-09-15
 
 ## User Story
 As a customer, I want to log in, add a product to cart, and check out.

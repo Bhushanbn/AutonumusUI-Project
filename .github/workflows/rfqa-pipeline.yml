@@ -7,20 +7,15 @@ on:
         description: "Repo owner"
         required: true
         type: string
-
       repo:
         description: "Acceptance criteria repo name"
         required: true
         type: string
-
       issue_number:
         description: "Issue number (must already be labeled RFQA / Ready for QA)"
         required: true
         type: string
 
-  # Fired by a workflow in the acceptance-criteria repo (e.g. GitRepo_Acceptance-Criteria)
-  # when an issue there is labeled RFQA / Ready for QA — see README/PIPELINE.md for the
-  # sender workflow that needs to live in that other repo.
   repository_dispatch:
     types: [rfqa-ready]
 
@@ -30,105 +25,48 @@ jobs:
     runs-on: ubuntu-latest
 
     env:
-      # GitHub authentication
       GITHUB_TOKEN: ${{ secrets.GH_PAT }}
-
-      # Target acceptance-criteria repository
       GITHUB_OWNER: ${{ inputs.owner || github.event.client_payload.owner }}
       GITHUB_REPO: ${{ inputs.repo || github.event.client_payload.repo }}
       ISSUE_NUMBER: ${{ inputs.issue_number || github.event.client_payload.issue_number }}
-
-      # Application under test
+      GITHUB_ISSUE_NUMBER: ${{ inputs.issue_number || github.event.client_payload.issue_number }}
       APP_BASE_URL: ${{ vars.APP_BASE_URL }}
-
-      # Claude authentication
-      # ANTHROPIC_API_KEY: ${{ secrets.ANTHROPIC_API_KEY }}
-
-      # ANTHROPIC_WORKSPACE_ID: ${{ secrets.ANTHROPIC_WORKSPACE_ID }}
-
-      
-      CLAUDE_CODE_OAUTH_TOKEN: ${{ secrets.CLAUDE_CODE_OAUTH_TOKEN }}
+      GEMINI_API_KEY: ${{ secrets.GEMINI_API_KEY }}
+      GEMINI_MODEL: ${{ vars.GEMINI_MODEL || 'gemini-2.5-flash' }}
 
     steps:
-
-      # --------------------------------------------------
-      # 1. Checkout automation repository
-      # --------------------------------------------------
       - name: Checkout automation repository
         uses: actions/checkout@v4
 
-      # --------------------------------------------------
-      # 2. Setup Node.js
-      # --------------------------------------------------
       - name: Setup Node.js
         uses: actions/setup-node@v4
         with:
           node-version: 20
           cache: npm
 
-      # --------------------------------------------------
-      # 3. Install project dependencies
-      # --------------------------------------------------
       - name: Install dependencies
         run: npm ci
 
-      # --------------------------------------------------
-      # 4. Install Playwright browser
-      # --------------------------------------------------
       - name: Install Playwright browsers
         run: npx playwright install --with-deps chromium
 
-      # --------------------------------------------------
-      # 5. Install Claude Code CLI
-      # --------------------------------------------------
-      - name: Install Claude Code CLI
-        run: npm install -g @anthropic-ai/claude-code
+      - name: Read RFQA issue into plan.md
+        run: npm run agent:read
 
-      # --------------------------------------------------
-      # 6. Run autonomous QA pipeline
-      # --------------------------------------------------
-      - name: Run Autonomous QA Agents
-        run: |
-          claude -p "
-          Execute the autonomous QA pipeline for:
+      - name: Generate test scenarios (SCENARIOS.md)
+        run: npm run agent:plan
 
-          Repository: ${GITHUB_OWNER}/${GITHUB_REPO}
-          Issue: #${ISSUE_NUMBER}
-          Application URL: ${APP_BASE_URL}
+      - name: Generate and run Playwright tests
+        run: npm run agent:generate
 
-          Follow this sequence:
+      - name: Run full test suite and build reports
+        if: always()
+        run: npm test
 
-          1. Run gitReaderAgent.
-             - Read the specified GitHub issue.
-             - Verify that it is ready for QA / RFQA.
-             - Extract the acceptance criteria and relevant requirements.
-             - Write the result to plan.md.
+      - name: Post result comment on GitHub issue
+        if: always()
+        run: node scripts/postComment.mjs
 
-          2. Run testPlannerAgent.
-             - Read plan.md.
-             - Create detailed test scenarios.
-             - Write the scenarios to SCENARIOS.md.
-
-          3. Run testGeneratorAgent.
-             - Read SCENARIOS.md.
-             - Generate the required Playwright tests following the existing project framework and coding conventions.
-             - Do not unnecessarily modify existing framework code.
-
-          4. Execute the generated Playwright tests.
-
-          5. Analyze the test results.
-
-          6. Post a concise PASS/FAIL summary as a comment on the original GitHub issue in ${GITHUB_OWNER}/${GITHUB_REPO}.
-
-          7. Preserve generated files, Playwright reports, screenshots, traces, and other test artifacts.
-
-          Do not stop after planning or test generation. Complete the entire pipeline.
-          " \
-            --permission-mode acceptEdits
-
-      # --------------------------------------------------
-      # 7. Upload Playwright report
-      # --------------------------------------------------
       - name: Upload Playwright report
         if: always()
         uses: actions/upload-artifact@v4
@@ -138,9 +76,6 @@ jobs:
           if-no-files-found: ignore
           retention-days: 14
 
-      # --------------------------------------------------
-      # 8. Upload Allure results
-      # --------------------------------------------------
       - name: Upload Allure results
         if: always()
         uses: actions/upload-artifact@v4
@@ -150,9 +85,15 @@ jobs:
           if-no-files-found: ignore
           retention-days: 14
 
-      # --------------------------------------------------
-      # 9. Upload generated QA files
-      # --------------------------------------------------
+      - name: Upload evidence
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: evidence
+          path: evidence/
+          if-no-files-found: ignore
+          retention-days: 14
+
       - name: Upload generated QA artifacts
         if: always()
         uses: actions/upload-artifact@v4

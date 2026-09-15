@@ -8,9 +8,9 @@ export class ProductsPage {
 
   constructor(page: Page) {
     this.page = page;
-    this.pageTitle = page.locator(".title", { hasText: "Products" });
-    this.cartBadge = page.getByTestId("shopping-cart-badge");
-    this.cartLink = page.getByTestId("shopping-cart-link");
+    this.pageTitle = page.locator(".title");
+    this.cartBadge = page.locator(".shopping_cart_badge");
+    this.cartLink = page.locator(".shopping_cart_link");
   }
 
   async expectDisplayed() {
@@ -41,6 +41,15 @@ export class ProductsPage {
 
   async isCartBadgeVisible(): Promise<boolean> {
     return this.cartBadge.isVisible();
+  }
+
+  async expectCartBadgeCount(count: string) {
+    await expect(this.cartBadge).toBeVisible();
+    await expect(this.cartBadge).toHaveText(count);
+  }
+
+  async expectRemoveButtonVisible(productName: string) {
+    await expect(this.removeButton(productName)).toBeVisible();
   }
 
   async goToCart() {
