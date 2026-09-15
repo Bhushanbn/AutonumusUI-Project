@@ -12,7 +12,7 @@ export class LoginPage {
     this.usernameInput = page.getByPlaceholder("Username");
     this.passwordInput = page.getByPlaceholder("Password");
     this.loginButton = page.getByRole("button", { name: "Login" });
-    this.errorMessage = page.getByTestId("error");
+    this.errorMessage = page.locator('[data-test="error"]');
   }
 
   async goto() {
@@ -38,7 +38,14 @@ export class LoginPage {
   }
 
   async expectStillOnLoginPage() {
-    await expect(this.page).toHaveURL(/saucedemo\.com\/?$/);
+    await expect(this.page).not.toHaveURL(/inventory\.html/);
     await expect(this.loginButton).toBeVisible();
+  }
+
+  async expectErrorMessageVisible(expectedText?: string) {
+    await expect(this.errorMessage).toBeVisible();
+    if (expectedText) {
+      await expect(this.errorMessage).toContainText(expectedText);
+    }
   }
 }

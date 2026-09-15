@@ -8,6 +8,7 @@ export default defineConfig({
     ["list"],
     ["html", { outputFolder: "playwright-report", open: "never" }],
     ["allure-playwright", { resultsDir: "allure-results" }],
+    ["json", { outputFile: "test-results/results.json" }],
   ],
   use: {
     baseURL: process.env.APP_BASE_URL ?? "https://www.saucedemo.com",

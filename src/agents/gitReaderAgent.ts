@@ -1,0 +1,160 @@
+import { writeFileSync } from "node:fs";
+import { config } from "../config.js";
+import { getIssue, listRfqaIssues, closeGithubClient } from "../mcp/githubClient.js";
+import type { RfqaIssue } from "../types.js";
+
+/**
+ * Deterministic, zero-LLM extraction — matches the behavior the Claude Code
+ * gitReaderAgent.md subagent used to perform. There is nothing here that
+ * needs an LLM: fetching an issue and reformatting its own markdown is a
+ * parsing problem, not a reasoning one. This is why swapping the LLM
+ * provider for the rest of the pipeline doesn't touch this stage at all.
+ */
+
+// Extracts the first section of the issue body that matches any of the given
+function extractSection(body: string, headerNames: string[]): string | null {
+  for (const name of headerNames) {
+    const escaped = name.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
+    // Deliberately no "m" flag: with it, "$" matches end-of-line instead of
+    // end-of-string, which truncates the match after the section's first
+    // line whenever nothing else follows. (Learned this the hard way once
+    // already — see git-reader-agent's issueParser.ts from the earlier
+    // TypeScript-only version of this project.)
+    const pattern = new RegExp(`##\\s*${escaped}\\s*\\n+([\\s\\S]*?)(?=\\n##\\s|$)`);
+    const match = body.match(pattern);
+    if (match?.[1]) return match[1].trim();
+  }
+  return null;
+}
+
+// Extracts the "Acceptance Criteria" section of the issue body and returns
+// it as an array of individual criteria lines, normalized to plain text.
+function extractAcceptanceCriteria(body: string): string[] {
+  const section = extractSection(body, ["Acceptance Criteria"]);
+  if (!section) {
+    throw new Error('No "## Acceptance Criteria" section found in the issue body.');
+  }
+  const lines = section.split("\n").map((l) => l.trim()).filter(Boolean);
+
+  const criteria: string[] = [];
+  for (const line of lines) {
+    // Matches "- AC1: text", "- text", or "1. text" — normalizes all three
+    // to plain criterion text; plan.md renumbers sequentially regardless of
+    // how the issue itself labeled them.
+    const withAcId = line.match(/^-\s*AC\d+:\s*(.+)$/i);
+    const bulletOnly = line.match(/^-\s*(.+)$/);
+    const numbered = line.match(/^\d+\.\s*(.+)$/);
+    const text = withAcId?.[1] ?? bulletOnly?.[1] ?? numbered?.[1];
+    if (text) criteria.push(text.trim());
+  }
+
+  if (criteria.length === 0) {
+    throw new Error("Acceptance Criteria section was found but no criteria lines parsed from it.");
+  }
+  return criteria;
+}
+
+// Renders the plan.md file content based on the issue and extracted sections.
+function renderPlanMarkdown(issue: RfqaIssue, criteria: string[], userStory: string, notes: string): string {
+  const numbered = criteria.map((c, i) => `${i + 1}. ${c}`).join("\n");
+  return `# Plan: ${issue.title} (#${issue.number})
+
+- Source: ${issue.url}
+- QA Status: ${issue.status}
+- Ingested: ${new Date().toISOString().slice(0, 10)}
+
+## User Story
+${userStory}
+
+## Acceptance Criteria
+${numbered}
+
+## Notes / Constraints
+${notes}
+`;
+}
+
+/**
+ * The single gate for the whole pipeline: nothing downstream (testPlannerAgent,
+ * testGeneratorAgent) re-checks RFQA status — they just trust that if plan.md
+ * exists, it was written legitimately. That makes this the ONLY enforcement
+ * point, which is why it's checked explicitly here rather than assumed from
+ * however the issue was resolved (label-filtered list vs. direct-by-number
+ * fetch use different code paths in resolveIssue() below — this check
+ * applies to both, uniformly, rather than trusting one path's filtering).
+ */
+// Returns true if the issue's status matches the configured RFQA status value
+function isReadyForQA(issue: RfqaIssue): boolean {
+  return (
+    issue.status === config.github.rfqaStatusValue ||
+    issue.status?.toUpperCase() === "RFQA"
+  );
+}
+
+// Resolves the RFQA issue to process, either by fetching a specific issue
+// number (if GITHUB_ISSUE_NUMBER is set) or by listing open issues and
+// filtering for the first one with the RFQA label.
+async function resolveIssue(): Promise<RfqaIssue | null> {
+  const explicitIssueNumber = process.env.GITHUB_ISSUE_NUMBER
+    ? Number(process.env.GITHUB_ISSUE_NUMBER)
+    : undefined;
+
+  if (explicitIssueNumber) {
+    if (!config.github.owner || !config.github.repo) {
+      throw new Error("GITHUB_OWNER and GITHUB_REPO must be set to fetch a specific issue.");
+    }
+    return getIssue(config.github.owner, config.github.repo, explicitIssueNumber);
+  }
+
+  if (!config.github.owner || !config.github.repo) {
+    throw new Error("GITHUB_OWNER and GITHUB_REPO are required (no issue number given to fetch directly).");
+  }
+  const rfqaIssues = await listRfqaIssues(config.github.owner, config.github.repo);
+  return rfqaIssues[0] ?? null;
+}
+
+//Checks for an RFQA issue, extracts relevant sections, and writes plan.md if applicable.
+export async function runGitReaderAgent(): Promise<RfqaIssue | null> {
+  console.log(`Checking ${config.github.owner}/${config.github.repo} for an RFQA issue...`);
+  const issue = await resolveIssue();
+
+  if (!issue) {
+    console.log("No RFQA issue found (checked open issues for an RFQA/Ready for QA label). Nothing to do.");
+    return null;
+  }
+
+  // Explicit gate, applied regardless of which path in resolveIssue() found
+  // this issue — a direct-by-number fetch has no built-in RFQA filtering,
+  // so without this check, GITHUB_ISSUE_NUMBER pointing at a non-RFQA issue
+  // would silently write plan.md for it anyway.
+  if (!isReadyForQA(issue)) {
+    console.log(`Issue #${issue.number} is not RFQA yet (status: "${issue.status}"). Nothing written.`,);
+    return null;
+  }
+
+  console.log(`Found issue #${issue.number}: "${issue.title}". Extracting Acceptance Criteria...`);
+  const userStory = extractSection(issue.body, ["User Story"]) ?? "(not specified in issue body)";
+  const criteria = extractAcceptanceCriteria(issue.body);
+  const notes = extractSection(issue.body, ["Notes / Constraints", "Notes for QA", "Notes"])
+    ?? "None explicitly stated in the issue.";
+
+    // Write plan.md with the extracted sections and acceptance criteria.
+  writeFileSync("plan.md", renderPlanMarkdown(issue, criteria, userStory, notes));
+  console.log(`Wrote plan.md with ${criteria.length} acceptance criteria.`);
+  return issue;
+}
+
+// The entry point for the gitReaderAgent script: runs the main logic and handles cleanup and error reporting.
+async function main() {
+  try {
+    const result = await runGitReaderAgent();
+    process.exit(result ? 0 : 1);
+  } finally {
+    await closeGithubClient();
+  }
+}
+
+main().catch((err) => {
+  console.error("gitReaderAgent failed:", err.message ?? err);
+  process.exit(1);
+});

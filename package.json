@@ -4,10 +4,16 @@
   "description": "",
   "main": "index.js",
   "scripts": {
+    "agent:read": "tsx src/agents/gitReaderAgent.ts",
+    "agent:plan": "tsx src/agents/testPlannerAgent.ts",
+    "agent:generate": "tsx src/agents/testGeneratorAgent.ts",
+    "agent:execute": "tsx src/agents/executionAgent.ts",
+    "agent:pipeline": "npm run agent:read && npm run agent:plan && npm run agent:generate",
     "test": "node scripts/run-tests.mjs",
     "report:generate": "allure generate allure-results --clean -o allure-report",
     "report:open": "allure open allure-report",
-    "report:html": "playwright show-report"
+    "report:html": "playwright show-report",
+    "evidence:build": "node scripts/buildEvidence.mjs"
   },
   "keywords": [],
   "author": "",
@@ -22,7 +28,7 @@
     "typescript": "^7.0.2"
   },
   "dependencies": {
-    "@anthropic-ai/sdk": "^0.123.0",
+    "@google/genai": "^2.22.0",
     "@modelcontextprotocol/sdk": "^1.30.0",
     "@playwright/test": "^1.62.1",
     "dotenv": "^17.4.2"

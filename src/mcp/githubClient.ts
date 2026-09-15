@@ -105,7 +105,13 @@ export async function listRfqaIssues(owner: string, repo: string): Promise<RfqaI
 
   return result.issues
     .filter((issue) =>
-      (issue.labels ?? []).some((l) => /^(rfqa|ready for qa)$/i.test(l.name)),
+      (issue.labels ?? []).some((l) => {
+        // The hosted GitHub MCP server's list_issues tool returns labels as
+        // plain strings, not {name: string} objects like GitHub's REST API —
+        // handle both shapes rather than assuming one.
+        const labelName = typeof l === "string" ? l : l.name;
+        return /^(rfqa|ready for qa)$/i.test(labelName ?? "");
+      }),
     )
     .map((issue) => ({
       owner,

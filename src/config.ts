@@ -22,4 +22,8 @@ export const config = {
   app: {
     baseUrl: process.env.APP_BASE_URL ?? "http://localhost:3000",
   },
+  gemini: {
+    apiKey: process.env.GEMINI_API_KEY,        // NOT required() — stays optional on purpose
+    model: process.env.GEMINI_MODEL ?? "gemini-2.5-flash",
+  },
 };
