@@ -30,27 +30,88 @@ function extractSection(body: string, headerNames: string[]): string | null {
 // Extracts the "Acceptance Criteria" section of the issue body and returns
 // it as an array of individual criteria lines, normalized to plain text.
 function extractAcceptanceCriteria(body: string): string[] {
-  const section = extractSection(body, ["Acceptance Criteria"]);
-  if (!section) {
-    throw new Error('No "## Acceptance Criteria" section found in the issue body.');
+  // Find "Acceptance Criteria" anywhere in the issue body.
+  // Supports:
+  // Acceptance Criteria
+  // Acceptance Criteria:
+  // ## Acceptance Criteria
+  // **Acceptance Criteria**
+  // **Acceptance Criteria:**
+  const headerMatch = body.match(/Acceptance\s+Criteria\s*:?\s*/i);
+
+  if (!headerMatch || headerMatch.index === undefined) {
+    throw new Error(
+      'No "Acceptance Criteria" section found in the issue body.',
+    );
   }
-  const lines = section.split("\n").map((l) => l.trim()).filter(Boolean);
+
+  // Everything after "Acceptance Criteria"
+  const startIndex = headerMatch.index + headerMatch[0].length;
+  const remaining = body.slice(startIndex);
+
+  // Stop when another section starts.
+  // Supports Markdown headings and common issue sections.
+  const nextSectionMatch = remaining.match(
+    /\n\s*#{1,6}\s+[^\n]+|\n\s*(?:User Story|Notes|Notes \/ Constraints|Notes for QA)\s*:?\s*(?:\n|$)/i,
+  );
+
+  const section = nextSectionMatch
+    ? remaining.slice(0, nextSectionMatch.index)
+    : remaining;
+
+  const lines = section
+    .split(/\r?\n/)
+    .map((line) => line.trim())
+    .filter(Boolean);
 
   const criteria: string[] = [];
+
   for (const line of lines) {
-    // Matches "- AC1: text", "- text", or "1. text" — normalizes all three
-    // to plain criterion text; plan.md renumbers sequentially regardless of
-    // how the issue itself labeled them.
-    const withAcId = line.match(/^-\s*AC\d+:\s*(.+)$/i);
-    const bulletOnly = line.match(/^-\s*(.+)$/);
-    const numbered = line.match(/^\d+\.\s*(.+)$/);
-    const text = withAcId?.[1] ?? bulletOnly?.[1] ?? numbered?.[1];
-    if (text) criteria.push(text.trim());
+    // AC1 - text
+    // AC1: text
+    // AC1 : text
+    // - AC1 - text
+    // - AC1: text
+    // * AC1 - text
+    const acLine = line.match(
+      /^[-*]?\s*AC\d+\s*(?:-|:)\s*(.+)$/i,
+    );
+
+    if (acLine?.[1]) {
+      criteria.push(acLine[1].trim());
+      continue;
+    }
+
+    // - text
+    // * text
+    // 1. text
+    // 1) text
+    const pointLine = line.match(
+      /^(?:[-*]\s+|\d+[.)]\s+)(.+)$/,
+    );
+
+    if (pointLine?.[1]) {
+      criteria.push(pointLine[1].trim());
+      continue;
+    }
+
+    // Plain acceptance criterion
+    // Example:
+    // User should see Inventory
+    if (
+      line &&
+      !/^Acceptance\s+Criteria\s*:?\s*$/i.test(line)
+    ) {
+      criteria.push(line);
+    }
   }
 
   if (criteria.length === 0) {
-    throw new Error("Acceptance Criteria section was found but no criteria lines parsed from it.");
+    throw new Error(
+      '"Acceptance Criteria" was found, but no acceptance criteria points were found.',
+    );
   }
+
   return criteria;
 }
 
