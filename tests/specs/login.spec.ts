@@ -1,6 +1,6 @@
 import { test } from "@playwright/test";
-import { LoginPage } from "../pages/LoginPage";
-import { ProductsPage } from "../pages/ProductsPage";
+import { LoginPage } from "../pages/LoginPage.js";
+import { ProductsPage } from "../pages/ProductsPage.js";
 
 test.describe("Login Flow", () => {
   test("AC1-S1: Log in successfully with valid credentials", async ({ page }) => {

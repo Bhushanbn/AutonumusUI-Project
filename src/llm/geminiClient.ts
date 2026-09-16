@@ -13,6 +13,17 @@ function getClient(): GoogleGenAI {
   return client;
 }
 
+/**
+ * Raw client access for executionAgent's multi-turn, tool-calling loop —
+ * generateText()/generateJSON() below are single-shot and don't expose
+ * `tools`/`toolConfig` or a growing `contents` array, which the live
+ * execution loop needs.
+ */
+// Exporting the raw Gemini client for use in multi-turn, tool-calling loops.
+export function getGeminiClient(): GoogleGenAI {
+  return getClient();
+}
+
 // Generates text using the Gemini model based on the provided system instruction and prompt.
 // If the request fails due to server overload, it retries up to 3 times with increasing delays.
 export async function generateText(params: {
