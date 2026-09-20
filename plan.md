@@ -1,17 +1,16 @@
-# Plan: Add to cart & checkout flow (#1)
+# Plan: Rename Products header to Inventory (#3)
 
 - Source: undefined
 - QA Status: Ready for QA
-- Ingested: 2026-09-15
+- Ingested: 2026-09-20
 
 ## User Story
-As a customer, I want to log in, add a product to cart, and check out.
+(not specified in issue body)
 
 ## Acceptance Criteria
 1. User can log in with valid credentials and land on the products page.
-2. An invalid login shows an error and does not navigate away.
-3. User can add "Sauce Labs Backpack" to the cart.
-4. User can complete checkout and see the confirmation message.
+2. Page header should be renamed from "Products" to "Inventory".
+3. The old "Products" header should not be displayed.
 
 ## Notes / Constraints
 None explicitly stated in the issue.

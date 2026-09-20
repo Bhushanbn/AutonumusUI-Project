@@ -5,6 +5,7 @@ import { runScenario } from "./executionLoop.js";
 import { EvidenceLogger } from "./evidenceRecorder.js";
 import { config } from "../config.js";
 
+// The main entry point for the executionAgent. It reads SCENARIOS.md, connects to the Playwright MCP, and runs each scenario in sequence, logging evidence and verdicts.
 async function main() {
   if (!existsSync("SCENARIOS.md")) {
     throw new Error("SCENARIOS.md not found — run agent:plan first.");

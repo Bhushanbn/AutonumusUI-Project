@@ -48,4 +48,8 @@ export class LoginPage {
       await expect(this.errorMessage).toContainText(expectedText);
     }
   }
+
+  async expectLoginFormNotVisible() {
+    await expect(this.loginButton).not.toBeVisible();
+  }
 }

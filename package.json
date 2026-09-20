@@ -4,7 +4,7 @@
   "description": "",
   "main": "index.js",
   "scripts": {
-    "agent:read": "tsx src/agents/gitReaderAgent.ts",
+    "agent:read": "tsx src/agents/gitReaderAgent.ts", 
     "agent:plan": "tsx src/agents/testPlannerAgent.ts",
     "agent:generate": "tsx src/agents/testGeneratorAgent.ts",
     "agent:execute": "tsx src/agents/executionAgent.ts",
