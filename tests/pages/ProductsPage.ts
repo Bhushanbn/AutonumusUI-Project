@@ -5,18 +5,32 @@ export class ProductsPage {
   readonly pageTitle: Locator;
   readonly cartBadge: Locator;
   readonly cartLink: Locator;
+  readonly inventoryList: Locator;
 
   constructor(page: Page) {
     this.page = page;
     this.pageTitle = page.locator(".title");
     this.cartBadge = page.locator(".shopping_cart_badge");
     this.cartLink = page.locator(".shopping_cart_link");
+    this.inventoryList = page.locator(".inventory_list");
   }
 
   async expectDisplayed() {
     await expect(this.page).toHaveURL(/inventory\.html/);
     await expect(this.pageTitle).toBeVisible();
-    await expect(this.pageTitle).toHaveText("Products");
+  }
+
+  async expectHeaderTitle(expectedText: string) {
+    await expect(this.pageTitle).toBeVisible();
+    await expect(this.pageTitle).toHaveText(expectedText);
+  }
+
+  async expectHeaderTitleNotToHaveText(unexpectedText: string) {
+    await expect(this.pageTitle).not.toHaveText(unexpectedText);
+  }
+
+  async expectInventoryListVisible() {
+    await expect(this.inventoryList).toBeVisible();
   }
 
   private productItem(productName: string): Locator {

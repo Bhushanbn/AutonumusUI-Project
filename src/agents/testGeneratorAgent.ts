@@ -5,7 +5,7 @@ import { generateText } from "../llm/geminiClient.js";
 import { config } from "../config.js";
 
 // The maximum number of iterations to attempt fixing failing tests before giving up and reporting a failure.
-const MAX_FIX_ITERATIONS = 2;
+const MAX_FIX_ITERATIONS = 1;
 
 // Instruction for Gemini, guiding it to generate runnable Playwright + TypeScript tests from the test scenarios in SCENARIOS.md.
 const SYSTEM_INSTRUCTION = `You are testGeneratorAgent, the execution-authoring stage of an autonomous QA pipeline. You turn test scenarios into real, runnable Playwright + TypeScript tests using the Page Object Model.

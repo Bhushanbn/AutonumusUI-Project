@@ -17,7 +17,7 @@
     "grepInvert": null,
     "maxFailures": 0,
     "metadata": {
-      "actualWorkers": 4
+      "actualWorkers": 6
     },
     "preserveOutput": "always",
     "projects": [
@@ -26,7 +26,7 @@
         "repeatEach": 1,
         "retries": 0,
         "metadata": {
-          "actualWorkers": 4
+          "actualWorkers": 6
         },
         "id": "chromium",
         "name": "chromium",
@@ -78,6 +78,219 @@
   },
   "suites": [
     {
+      "title": "cart_checkout.spec.ts",
+      "file": "cart_checkout.spec.ts",
+      "column": 0,
+      "line": 0,
+      "specs": [],
+      "suites": [
+        {
+          "title": "Add to cart & checkout flow",
+          "file": "cart_checkout.spec.ts",
+          "line": 7,
+          "column": 6,
+          "specs": [
+            {
+              "title": "AC1-S1: Log in successfully with valid credentials",
+              "ok": true,
+              "tags": [],
+              "tests": [
+                {
+                  "timeout": 30000,
+                  "annotations": [],
+                  "expectedStatus": "passed",
+                  "projectId": "chromium",
+                  "projectName": "chromium",
+                  "results": [
+                    {
+                      "workerIndex": 0,
+                      "parallelIndex": 0,
+                      "status": "passed",
+                      "duration": 6315,
+                      "errors": [],
+                      "stdout": [],
+                      "stderr": [],
+                      "retry": 0,
+                      "steps": [
+                        {
+                          "title": "Navigate to the login page",
+                          "duration": 4323
+                        },
+                        {
+                          "title": "Enter valid credentials and click Login",
+                          "duration": 466
+                        },
+                        {
+                          "title": "Verify redirection to Products page and header title",
+                          "duration": 415
+                        }
+                      ],
+                      "startTime": "2026-09-20T03:48:16.889Z",
+                      "annotations": [],
+                      "attachments": []
+                    }
+                  ],
+                  "status": "expected"
+                }
+              ],
+              "id": "9f2ae48fd43326cac3f6-9402b2b6cbee11973264",
+              "file": "cart_checkout.spec.ts",
+              "line": 8,
+              "column": 3
+            },
+            {
+              "title": "AC2-S1: Attempt login with invalid credentials",
+              "ok": true,
+              "tags": [],
+              "tests": [
+                {
+                  "timeout": 30000,
+                  "annotations": [],
+                  "expectedStatus": "passed",
+                  "projectId": "chromium",
+                  "projectName": "chromium",
+                  "results": [
+                    {
+                      "workerIndex": 1,
+                      "parallelIndex": 1,
+                      "status": "passed",
+                      "duration": 6687,
+                      "errors": [],
+                      "stdout": [],
+                      "stderr": [],
+                      "retry": 0,
+                      "steps": [
+                        {
+                          "title": "Navigate to the login page",
+                          "duration": 4349
+                        },
+                        {
+                          "title": "Enter invalid credentials and click Login",
+                          "duration": 892
+                        },
+                        {
+                          "title": "Verify error message is displayed and user remains on login page",
+                          "duration": 161
+                        }
+                      ],
+                      "startTime": "2026-09-20T03:48:17.285Z",
+                      "annotations": [],
+                      "attachments": []
+                    }
+                  ],
+                  "status": "expected"
+                }
+              ],
+              "id": "9f2ae48fd43326cac3f6-339d180a39e187bb98be",
+              "file": "cart_checkout.spec.ts",
+              "line": 25,
+              "column": 3
+            },
+            {
+              "title": "AC3-S1: Add \"Sauce Labs Backpack\" to cart from the products page",
+              "ok": true,
+              "tags": [],
+              "tests": [
+                {
+                  "timeout": 30000,
+                  "annotations": [],
+                  "expectedStatus": "passed",
+                  "projectId": "chromium",
+                  "projectName": "chromium",
+                  "results": [
+                    {
+                      "workerIndex": 2,
+                      "parallelIndex": 2,
+                      "status": "passed",
+                      "duration": 6745,
+                      "errors": [],
+                      "stdout": [],
+                      "stderr": [],
+                      "retry": 0,
+                      "steps": [
+                        {
+                          "title": "Log in with valid credentials",
+                          "duration": 4623
+                        },
+                        {
+                          "title": "Locate \"Sauce Labs Backpack\" and click \"Add to cart\"",
+                          "duration": 396
+                        },
+                        {
+                          "title": "Verify cart badge count updates to \"1\" and button changes to \"Remove\"",
+                          "duration": 115
+                        }
+                      ],
+                      "startTime": "2026-09-20T03:48:16.828Z",
+                      "annotations": [],
+                      "attachments": []
+                    }
+                  ],
+                  "status": "expected"
+                }
+              ],
+              "id": "9f2ae48fd43326cac3f6-3928b1cb3ed71a0df57a",
+              "file": "cart_checkout.spec.ts",
+              "line": 42,
+              "column": 3
+            },
+            {
+              "title": "AC4-S1: Complete checkout process for item in cart",
+              "ok": true,
+              "tags": [],
+              "tests": [
+                {
+                  "timeout": 30000,
+                  "annotations": [],
+                  "expectedStatus": "passed",
+                  "projectId": "chromium",
+                  "projectName": "chromium",
+                  "results": [
+                    {
+                      "workerIndex": 3,
+                      "parallelIndex": 3,
+                      "status": "passed",
+                      "duration": 7550,
+                      "errors": [],
+                      "stdout": [],
+                      "stderr": [],
+                      "retry": 0,
+                      "steps": [
+                        {
+                          "title": "Log in and add \"Sauce Labs Backpack\" to cart",
+                          "duration": 5439
+                        },
+                        {
+                          "title": "Navigate to cart page",
+                          "duration": 217
+                        },
+                        {
+                          "title": "Click Checkout and fill shipping information",
+                          "duration": 476
+                        },
+                        {
+                          "title": "Finish checkout and verify confirmation message",
+                          "duration": 167
+                        }
+                      ],
+                      "startTime": "2026-09-20T03:48:17.357Z",
+                      "annotations": [],
+                      "attachments": []
+                    }
+                  ],
+                  "status": "expected"
+                }
+              ],
+              "id": "9f2ae48fd43326cac3f6-240e423ab48e135031ad",
+              "file": "cart_checkout.spec.ts",
+              "line": 61,
+              "column": 3
+            }
+          ]
+        }
+      ]
+    },
+    {
       "title": "cart.spec.ts",
       "file": "cart.spec.ts",
       "column": 0,
@@ -103,10 +316,10 @@
                   "projectName": "chromium",
                   "results": [
                     {
-                      "workerIndex": 0,
-                      "parallelIndex": 0,
+                      "workerIndex": 4,
+                      "parallelIndex": 4,
                       "status": "passed",
-                      "duration": 5217,
+                      "duration": 6524,
                       "errors": [],
                       "stdout": [],
                       "stderr": [],
@@ -114,18 +327,18 @@
                       "steps": [
                         {
                           "title": "Preconditions: Log in and navigate to products page",
-                          "duration": 4315
+                          "duration": 5174
                         },
                         {
                           "title": "Click \"Add to cart\" for \"Sauce Labs Backpack\"",
-                          "duration": 77
+                          "duration": 116
                         },
                         {
                           "title": "Verify cart badge displays \"1\" and button changes to \"Remove\"",
-                          "duration": 55
+                          "duration": 114
                         }
                       ],
-                      "startTime": "2026-09-15T09:45:12.392Z",
+                      "startTime": "2026-09-20T03:48:16.794Z",
                       "annotations": [],
                       "attachments": []
                     }
@@ -168,10 +381,10 @@
                   "projectName": "chromium",
                   "results": [
                     {
-                      "workerIndex": 1,
-                      "parallelIndex": 1,
+                      "workerIndex": 5,
+                      "parallelIndex": 5,
                       "status": "passed",
-                      "duration": 5558,
+                      "duration": 7255,
                       "errors": [],
                       "stdout": [],
                       "stderr": [],
@@ -179,30 +392,30 @@
                       "steps": [
                         {
                           "title": "Preconditions: Log in and add \"Sauce Labs Backpack\" to cart",
-                          "duration": 4445
+                          "duration": 4775
                         },
                         {
                           "title": "Click shopping cart icon to view cart",
-                          "duration": 112
+                          "duration": 267
                         },
                         {
                           "title": "Click \"Checkout\" button",
-                          "duration": 90
+                          "duration": 169
                         },
                         {
                           "title": "Enter customer info and click Continue",
-                          "duration": 238
+                          "duration": 398
                         },
                         {
                           "title": "Click \"Finish\" button on checkout overview page",
-                          "duration": 78
+                          "duration": 98
                         },
                         {
                           "title": "Verify order confirmation header is displayed",
-                          "duration": 37
+                          "duration": 75
                         }
                       ],
-                      "startTime": "2026-09-15T09:45:12.393Z",
+                      "startTime": "2026-09-20T03:48:17.263Z",
                       "annotations": [],
                       "attachments": []
                     }
@@ -213,6 +426,273 @@
               "id": "25ab1bfc84c57e3e3a45-add34601e447f963b7eb",
               "file": "checkout.spec.ts",
               "line": 8,
+              "column": 3
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "title": "header-rename.spec.ts",
+      "file": "header-rename.spec.ts",
+      "column": 0,
+      "line": 0,
+      "specs": [],
+      "suites": [
+        {
+          "title": "Header Rename to Inventory",
+          "file": "header-rename.spec.ts",
+          "line": 5,
+          "column": 6,
+          "specs": [
+            {
+              "title": "AC1-S1: Successful login with valid credentials",
+              "ok": true,
+              "tags": [],
+              "tests": [
+                {
+                  "timeout": 30000,
+                  "annotations": [],
+                  "expectedStatus": "passed",
+                  "projectId": "chromium",
+                  "projectName": "chromium",
+                  "results": [
+                    {
+                      "workerIndex": 0,
+                      "parallelIndex": 0,
+                      "status": "passed",
+                      "duration": 3480,
+                      "errors": [],
+                      "stdout": [],
+                      "stderr": [],
+                      "retry": 0,
+                      "steps": [
+                        {
+                          "title": "Navigate to login page",
+                          "duration": 843
+                        },
+                        {
+                          "title": "Type valid credentials and click Login button",
+                          "duration": 329
+                        },
+                        {
+                          "title": "Verify login form disappears and user is redirected to inventory URL",
+                          "duration": 701
+                        },
+                        {
+                          "title": "Verify main page content (inventory list) is rendered and visible",
+                          "duration": 311
+                        }
+                      ],
+                      "startTime": "2026-09-20T03:48:30.809Z",
+                      "annotations": [],
+                      "attachments": []
+                    }
+                  ],
+                  "status": "expected"
+                }
+              ],
+              "id": "b9a8c50310815f099dc8-ec2c3c34b4d2d6051c22",
+              "file": "header-rename.spec.ts",
+              "line": 6,
+              "column": 3
+            },
+            {
+              "title": "AC2-S1: Verify primary page header text is 'Inventory'",
+              "ok": false,
+              "tags": [],
+              "tests": [
+                {
+                  "timeout": 30000,
+                  "annotations": [],
+                  "expectedStatus": "passed",
+                  "projectId": "chromium",
+                  "projectName": "chromium",
+                  "results": [
+                    {
+                      "workerIndex": 2,
+                      "parallelIndex": 2,
+                      "status": "failed",
+                      "duration": 7146,
+                      "error": {
+                        "message": "Error: \u001b[2mexpect(\u001b[22m\u001b[31mlocator\u001b[39m\u001b[2m).\u001b[22mtoHaveText\u001b[2m(\u001b[22m\u001b[32mexpected\u001b[39m\u001b[2m)\u001b[22m failed\n\nLocator:  locator('.title')\nExpected: \u001b[32m\"Inventory\"\u001b[39m\nReceived: \u001b[31m\"Products\"\u001b[39m\nTimeout:  5000ms\n\nCall log:\n\u001b[2m  - Expect \"toHaveText\" with timeout 5000ms\u001b[22m\n\u001b[2m  - waiting for locator('.title')\u001b[22m\n\u001b[2m    13 × locator resolved to <span class=\"title\" data-test=\"title\">Products</span>\u001b[22m\n\u001b[2m       - unexpected value \"Products\"\u001b[22m\n",
+                        "stack": "Error: \u001b[2mexpect(\u001b[22m\u001b[31mlocator\u001b[39m\u001b[2m).\u001b[22mtoHaveText\u001b[2m(\u001b[22m\u001b[32mexpected\u001b[39m\u001b[2m)\u001b[22m failed\n\nLocator:  locator('.title')\nExpected: \u001b[32m\"Inventory\"\u001b[39m\nReceived: \u001b[31m\"Products\"\u001b[39m\nTimeout:  5000ms\n\nCall log:\n\u001b[2m  - Expect \"toHaveText\" with timeout 5000ms\u001b[22m\n\u001b[2m  - waiting for locator('.title')\u001b[22m\n\u001b[2m    13 × locator resolved to <span class=\"title\" data-test=\"title\">Products</span>\u001b[22m\n\u001b[2m       - unexpected value \"Products\"\u001b[22m\n\n    at ProductsPage.expectHeaderTitle (C:\\Users\\Admin\\IdeaProjects\\New folder\\Autonomous_UI_Test\\tests\\pages\\ProductsPage.ts:25:34)\n    at C:\\Users\\Admin\\IdeaProjects\\New folder\\Autonomous_UI_Test\\tests\\specs\\header-rename.spec.ts:39:7\n    at C:\\Users\\Admin\\IdeaProjects\\New folder\\Autonomous_UI_Test\\tests\\specs\\header-rename.spec.ts:38:5",
+                        "location": {
+                          "file": "C:\\Users\\Admin\\IdeaProjects\\New folder\\Autonomous_UI_Test\\tests\\pages\\ProductsPage.ts",
+                          "column": 34,
+                          "line": 25
+                        },
+                        "snippet": "\u001b[90m   at \u001b[39m..\\pages\\ProductsPage.ts:25\n\n\u001b[0m \u001b[90m 23 |\u001b[39m   \u001b[36masync\u001b[39m expectHeaderTitle(expectedText\u001b[33m:\u001b[39m string) {\n \u001b[90m 24 |\u001b[39m     \u001b[36mawait\u001b[39m expect(\u001b[36mthis\u001b[39m\u001b[33m.\u001b[39mpageTitle)\u001b[33m.\u001b[39mtoBeVisible()\u001b[33m;\u001b[39m\n\u001b[31m\u001b[1m>\u001b[22m\u001b[39m\u001b[90m 25 |\u001b[39m     \u001b[36mawait\u001b[39m expect(\u001b[36mthis\u001b[39m\u001b[33m.\u001b[39mpageTitle)\u001b[33m.\u001b[39mtoHaveText(expectedText)\u001b[33m;\u001b[39m\n \u001b[90m    |\u001b[39m                                  \u001b[31m\u001b[1m^\u001b[22m\u001b[39m\n \u001b[90m 26 |\u001b[39m   }\n \u001b[90m 27 |\u001b[39m\n \u001b[90m 28 |\u001b[39m   \u001b[36masync\u001b[39m expectHeaderTitleNotToHaveText(unexpectedText\u001b[33m:\u001b[39m string) {\u001b[0m"
+                      },
+                      "errors": [
+                        {
+                          "location": {
+                            "file": "C:\\Users\\Admin\\IdeaProjects\\New folder\\Autonomous_UI_Test\\tests\\pages\\ProductsPage.ts",
+                            "column": 34,
+                            "line": 25
+                          },
+                          "message": "Error: \u001b[2mexpect(\u001b[22m\u001b[31mlocator\u001b[39m\u001b[2m).\u001b[22mtoHaveText\u001b[2m(\u001b[22m\u001b[32mexpected\u001b[39m\u001b[2m)\u001b[22m failed\n\nLocator:  locator('.title')\nExpected: \u001b[32m\"Inventory\"\u001b[39m\nReceived: \u001b[31m\"Products\"\u001b[39m\nTimeout:  5000ms\n\nCall log:\n\u001b[2m  - Expect \"toHaveText\" with timeout 5000ms\u001b[22m\n\u001b[2m  - waiting for locator('.title')\u001b[22m\n\u001b[2m    13 × locator resolved to <span class=\"title\" data-test=\"title\">Products</span>\u001b[22m\n\u001b[2m       - unexpected value \"Products\"\u001b[22m\n\n\n\u001b[90m   at \u001b[39m..\\pages\\ProductsPage.ts:25\n\n\u001b[0m \u001b[90m 23 |\u001b[39m   \u001b[36masync\u001b[39m expectHeaderTitle(expectedText\u001b[33m:\u001b[39m string) {\n \u001b[90m 24 |\u001b[39m     \u001b[36mawait\u001b[39m expect(\u001b[36mthis\u001b[39m\u001b[33m.\u001b[39mpageTitle)\u001b[33m.\u001b[39mtoBeVisible()\u001b[33m;\u001b[39m\n\u001b[31m\u001b[1m>\u001b[22m\u001b[39m\u001b[90m 25 |\u001b[39m     \u001b[36mawait\u001b[39m expect(\u001b[36mthis\u001b[39m\u001b[33m.\u001b[39mpageTitle)\u001b[33m.\u001b[39mtoHaveText(expectedText)\u001b[33m;\u001b[39m\n \u001b[90m    |\u001b[39m                                  \u001b[31m\u001b[1m^\u001b[22m\u001b[39m\n \u001b[90m 26 |\u001b[39m   }\n \u001b[90m 27 |\u001b[39m\n \u001b[90m 28 |\u001b[39m   \u001b[36masync\u001b[39m expectHeaderTitleNotToHaveText(unexpectedText\u001b[33m:\u001b[39m string) {\u001b[0m\n\u001b[2m    at ProductsPage.expectHeaderTitle (C:\\Users\\Admin\\IdeaProjects\\New folder\\Autonomous_UI_Test\\tests\\pages\\ProductsPage.ts:25:34)\u001b[22m\n\u001b[2m    at C:\\Users\\Admin\\IdeaProjects\\New folder\\Autonomous_UI_Test\\tests\\specs\\header-rename.spec.ts:39:7\u001b[22m\n\u001b[2m    at C:\\Users\\Admin\\IdeaProjects\\New folder\\Autonomous_UI_Test\\tests\\specs\\header-rename.spec.ts:38:5\u001b[22m"
+                        }
+                      ],
+                      "stdout": [],
+                      "stderr": [],
+                      "retry": 0,
+                      "steps": [
+                        {
+                          "title": "Log in as valid user",
+                          "duration": 1520
+                        },
+                        {
+                          "title": "Locate main header and verify text reads exactly 'Inventory'",
+                          "duration": 5057,
+                          "error": {
+                            "message": "Error: \u001b[2mexpect(\u001b[22m\u001b[31mlocator\u001b[39m\u001b[2m).\u001b[22mtoHaveText\u001b[2m(\u001b[22m\u001b[32mexpected\u001b[39m\u001b[2m)\u001b[22m failed\n\nLocator:  locator('.title')\nExpected: \u001b[32m\"Inventory\"\u001b[39m\nReceived: \u001b[31m\"Products\"\u001b[39m\nTimeout:  5000ms\n\nCall log:\n\u001b[2m  - Expect \"toHaveText\" with timeout 5000ms\u001b[22m\n\u001b[2m  - waiting for locator('.title')\u001b[22m\n\u001b[2m    13 × locator resolved to <span class=\"title\" data-test=\"title\">Products</span>\u001b[22m\n\u001b[2m       - unexpected value \"Products\"\u001b[22m\n",
+                            "stack": "Error: \u001b[2mexpect(\u001b[22m\u001b[31mlocator\u001b[39m\u001b[2m).\u001b[22mtoHaveText\u001b[2m(\u001b[22m\u001b[32mexpected\u001b[39m\u001b[2m)\u001b[22m failed\n\nLocator:  locator('.title')\nExpected: \u001b[32m\"Inventory\"\u001b[39m\nReceived: \u001b[31m\"Products\"\u001b[39m\nTimeout:  5000ms\n\nCall log:\n\u001b[2m  - Expect \"toHaveText\" with timeout 5000ms\u001b[22m\n\u001b[2m  - waiting for locator('.title')\u001b[22m\n\u001b[2m    13 × locator resolved to <span class=\"title\" data-test=\"title\">Products</span>\u001b[22m\n\u001b[2m       - unexpected value \"Products\"\u001b[22m\n\n    at ProductsPage.expectHeaderTitle (C:\\Users\\Admin\\IdeaProjects\\New folder\\Autonomous_UI_Test\\tests\\pages\\ProductsPage.ts:25:34)\n    at C:\\Users\\Admin\\IdeaProjects\\New folder\\Autonomous_UI_Test\\tests\\specs\\header-rename.spec.ts:39:7\n    at C:\\Users\\Admin\\IdeaProjects\\New folder\\Autonomous_UI_Test\\tests\\specs\\header-rename.spec.ts:38:5",
+                            "location": {
+                              "file": "C:\\Users\\Admin\\IdeaProjects\\New folder\\Autonomous_UI_Test\\tests\\pages\\ProductsPage.ts",
+                              "column": 34,
+                              "line": 25
+                            },
+                            "snippet": "\u001b[90m   at \u001b[39m..\\pages\\ProductsPage.ts:25\n\n\u001b[0m \u001b[90m 23 |\u001b[39m   \u001b[36masync\u001b[39m expectHeaderTitle(expectedText\u001b[33m:\u001b[39m string) {\n \u001b[90m 24 |\u001b[39m     \u001b[36mawait\u001b[39m expect(\u001b[36mthis\u001b[39m\u001b[33m.\u001b[39mpageTitle)\u001b[33m.\u001b[39mtoBeVisible()\u001b[33m;\u001b[39m\n\u001b[31m\u001b[1m>\u001b[22m\u001b[39m\u001b[90m 25 |\u001b[39m     \u001b[36mawait\u001b[39m expect(\u001b[36mthis\u001b[39m\u001b[33m.\u001b[39mpageTitle)\u001b[33m.\u001b[39mtoHaveText(expectedText)\u001b[33m;\u001b[39m\n \u001b[90m    |\u001b[39m                                  \u001b[31m\u001b[1m^\u001b[22m\u001b[39m\n \u001b[90m 26 |\u001b[39m   }\n \u001b[90m 27 |\u001b[39m\n \u001b[90m 28 |\u001b[39m   \u001b[36masync\u001b[39m expectHeaderTitleNotToHaveText(unexpectedText\u001b[33m:\u001b[39m string) {\u001b[0m"
+                          }
+                        }
+                      ],
+                      "startTime": "2026-09-20T03:48:31.074Z",
+                      "annotations": [],
+                      "attachments": [
+                        {
+                          "name": "screenshot",
+                          "contentType": "image/png",
+                          "path": "C:\\Users\\Admin\\IdeaProjects\\New folder\\Autonomous_UI_Test\\test-results\\header-rename-Header-Renam-29817-e-header-text-is-Inventory--chromium\\test-failed-1.png"
+                        },
+                        {
+                          "name": "video",
+                          "contentType": "video/webm",
+                          "path": "C:\\Users\\Admin\\IdeaProjects\\New folder\\Autonomous_UI_Test\\test-results\\header-rename-Header-Renam-29817-e-header-text-is-Inventory--chromium\\video.webm"
+                        },
+                        {
+                          "name": "error-context",
+                          "contentType": "text/markdown",
+                          "path": "C:\\Users\\Admin\\IdeaProjects\\New folder\\Autonomous_UI_Test\\test-results\\header-rename-Header-Renam-29817-e-header-text-is-Inventory--chromium\\error-context.md"
+                        },
+                        {
+                          "name": "trace",
+                          "contentType": "application/zip",
+                          "path": "C:\\Users\\Admin\\IdeaProjects\\New folder\\Autonomous_UI_Test\\test-results\\header-rename-Header-Renam-29817-e-header-text-is-Inventory--chromium\\trace.zip"
+                        }
+                      ],
+                      "errorLocation": {
+                        "file": "C:\\Users\\Admin\\IdeaProjects\\New folder\\Autonomous_UI_Test\\tests\\pages\\ProductsPage.ts",
+                        "column": 34,
+                        "line": 25
+                      }
+                    }
+                  ],
+                  "status": "unexpected"
+                }
+              ],
+              "id": "b9a8c50310815f099dc8-73438a1322e47e97cc0a",
+              "file": "header-rename.spec.ts",
+              "line": 28,
+              "column": 3
+            },
+            {
+              "title": "AC3-S1: Verify old 'Products' header is absent",
+              "ok": false,
+              "tags": [],
+              "tests": [
+                {
+                  "timeout": 30000,
+                  "annotations": [],
+                  "expectedStatus": "passed",
+                  "projectId": "chromium",
+                  "projectName": "chromium",
+                  "results": [
+                    {
+                      "workerIndex": 1,
+                      "parallelIndex": 1,
+                      "status": "failed",
+                      "duration": 7278,
+                      "error": {
+                        "message": "Error: \u001b[2mexpect(\u001b[22m\u001b[31mlocator\u001b[39m\u001b[2m).not.\u001b[22mtoHaveText\u001b[2m(\u001b[22m\u001b[32mexpected\u001b[39m\u001b[2m)\u001b[22m failed\n\nLocator:  locator('.title')\nExpected: not \u001b[32m\"Products\"\u001b[39m\nReceived: \u001b[31m\"\u001b[7mProducts\u001b[27m\"\u001b[39m\nTimeout:  5000ms\n\nCall log:\n\u001b[2m  - Expect \"not toHaveText\" with timeout 5000ms\u001b[22m\n\u001b[2m  - waiting for locator('.title')\u001b[22m\n\u001b[2m    14 × locator resolved to <span class=\"title\" data-test=\"title\">Products</span>\u001b[22m\n\u001b[2m       - unexpected value \"Products\"\u001b[22m\n",
+                        "stack": "Error: \u001b[2mexpect(\u001b[22m\u001b[31mlocator\u001b[39m\u001b[2m).not.\u001b[22mtoHaveText\u001b[2m(\u001b[22m\u001b[32mexpected\u001b[39m\u001b[2m)\u001b[22m failed\n\nLocator:  locator('.title')\nExpected: not \u001b[32m\"Products\"\u001b[39m\nReceived: \u001b[31m\"\u001b[7mProducts\u001b[27m\"\u001b[39m\nTimeout:  5000ms\n\nCall log:\n\u001b[2m  - Expect \"not toHaveText\" with timeout 5000ms\u001b[22m\n\u001b[2m  - waiting for locator('.title')\u001b[22m\n\u001b[2m    14 × locator resolved to <span class=\"title\" data-test=\"title\">Products</span>\u001b[22m\n\u001b[2m       - unexpected value \"Products\"\u001b[22m\n\n    at ProductsPage.expectHeaderTitleNotToHaveText (C:\\Users\\Admin\\IdeaProjects\\New folder\\Autonomous_UI_Test\\tests\\pages\\ProductsPage.ts:29:38)\n    at C:\\Users\\Admin\\IdeaProjects\\New folder\\Autonomous_UI_Test\\tests\\specs\\header-rename.spec.ts:54:26\n    at C:\\Users\\Admin\\IdeaProjects\\New folder\\Autonomous_UI_Test\\tests\\specs\\header-rename.spec.ts:53:5",
+                        "location": {
+                          "file": "C:\\Users\\Admin\\IdeaProjects\\New folder\\Autonomous_UI_Test\\tests\\pages\\ProductsPage.ts",
+                          "column": 38,
+                          "line": 29
+                        },
+                        "snippet": "\u001b[90m   at \u001b[39m..\\pages\\ProductsPage.ts:29\n\n\u001b[0m \u001b[90m 27 |\u001b[39m\n \u001b[90m 28 |\u001b[39m   \u001b[36masync\u001b[39m expectHeaderTitleNotToHaveText(unexpectedText\u001b[33m:\u001b[39m string) {\n\u001b[31m\u001b[1m>\u001b[22m\u001b[39m\u001b[90m 29 |\u001b[39m     \u001b[36mawait\u001b[39m expect(\u001b[36mthis\u001b[39m\u001b[33m.\u001b[39mpageTitle)\u001b[33m.\u001b[39mnot\u001b[33m.\u001b[39mtoHaveText(unexpectedText)\u001b[33m;\u001b[39m\n \u001b[90m    |\u001b[39m                                      \u001b[31m\u001b[1m^\u001b[22m\u001b[39m\n \u001b[90m 30 |\u001b[39m   }\n \u001b[90m 31 |\u001b[39m\n \u001b[90m 32 |\u001b[39m   \u001b[36masync\u001b[39m expectInventoryListVisible() {\u001b[0m"
+                      },
+                      "errors": [
+                        {
+                          "location": {
+                            "file": "C:\\Users\\Admin\\IdeaProjects\\New folder\\Autonomous_UI_Test\\tests\\pages\\ProductsPage.ts",
+                            "column": 38,
+                            "line": 29
+                          },
+                          "message": "Error: \u001b[2mexpect(\u001b[22m\u001b[31mlocator\u001b[39m\u001b[2m).not.\u001b[22mtoHaveText\u001b[2m(\u001b[22m\u001b[32mexpected\u001b[39m\u001b[2m)\u001b[22m failed\n\nLocator:  locator('.title')\nExpected: not \u001b[32m\"Products\"\u001b[39m\nReceived: \u001b[31m\"\u001b[7mProducts\u001b[27m\"\u001b[39m\nTimeout:  5000ms\n\nCall log:\n\u001b[2m  - Expect \"not toHaveText\" with timeout 5000ms\u001b[22m\n\u001b[2m  - waiting for locator('.title')\u001b[22m\n\u001b[2m    14 × locator resolved to <span class=\"title\" data-test=\"title\">Products</span>\u001b[22m\n\u001b[2m       - unexpected value \"Products\"\u001b[22m\n\n\n\u001b[90m   at \u001b[39m..\\pages\\ProductsPage.ts:29\n\n\u001b[0m \u001b[90m 27 |\u001b[39m\n \u001b[90m 28 |\u001b[39m   \u001b[36masync\u001b[39m expectHeaderTitleNotToHaveText(unexpectedText\u001b[33m:\u001b[39m string) {\n\u001b[31m\u001b[1m>\u001b[22m\u001b[39m\u001b[90m 29 |\u001b[39m     \u001b[36mawait\u001b[39m expect(\u001b[36mthis\u001b[39m\u001b[33m.\u001b[39mpageTitle)\u001b[33m.\u001b[39mnot\u001b[33m.\u001b[39mtoHaveText(unexpectedText)\u001b[33m;\u001b[39m\n \u001b[90m    |\u001b[39m                                      \u001b[31m\u001b[1m^\u001b[22m\u001b[39m\n \u001b[90m 30 |\u001b[39m   }\n \u001b[90m 31 |\u001b[39m\n \u001b[90m 32 |\u001b[39m   \u001b[36masync\u001b[39m expectInventoryListVisible() {\u001b[0m\n\u001b[2m    at ProductsPage.expectHeaderTitleNotToHaveText (C:\\Users\\Admin\\IdeaProjects\\New folder\\Autonomous_UI_Test\\tests\\pages\\ProductsPage.ts:29:38)\u001b[22m\n\u001b[2m    at C:\\Users\\Admin\\IdeaProjects\\New folder\\Autonomous_UI_Test\\tests\\specs\\header-rename.spec.ts:54:26\u001b[22m\n\u001b[2m    at C:\\Users\\Admin\\IdeaProjects\\New folder\\Autonomous_UI_Test\\tests\\specs\\header-rename.spec.ts:53:5\u001b[22m"
+                        }
+                      ],
+                      "stdout": [],
+                      "stderr": [],
+                      "retry": 0,
+                      "steps": [
+                        {
+                          "title": "Log in as valid user",
+                          "duration": 1530
+                        },
+                        {
+                          "title": "Inspect main header area and verify 'Products' text is not displayed",
+                          "duration": 5032,
+                          "error": {
+                            "message": "Error: \u001b[2mexpect(\u001b[22m\u001b[31mlocator\u001b[39m\u001b[2m).not.\u001b[22mtoHaveText\u001b[2m(\u001b[22m\u001b[32mexpected\u001b[39m\u001b[2m)\u001b[22m failed\n\nLocator:  locator('.title')\nExpected: not \u001b[32m\"Products\"\u001b[39m\nReceived: \u001b[31m\"\u001b[7mProducts\u001b[27m\"\u001b[39m\nTimeout:  5000ms\n\nCall log:\n\u001b[2m  - Expect \"not toHaveText\" with timeout 5000ms\u001b[22m\n\u001b[2m  - waiting for locator('.title')\u001b[22m\n\u001b[2m    14 × locator resolved to <span class=\"title\" data-test=\"title\">Products</span>\u001b[22m\n\u001b[2m       - unexpected value \"Products\"\u001b[22m\n",
+                            "stack": "Error: \u001b[2mexpect(\u001b[22m\u001b[31mlocator\u001b[39m\u001b[2m).not.\u001b[22mtoHaveText\u001b[2m(\u001b[22m\u001b[32mexpected\u001b[39m\u001b[2m)\u001b[22m failed\n\nLocator:  locator('.title')\nExpected: not \u001b[32m\"Products\"\u001b[39m\nReceived: \u001b[31m\"\u001b[7mProducts\u001b[27m\"\u001b[39m\nTimeout:  5000ms\n\nCall log:\n\u001b[2m  - Expect \"not toHaveText\" with timeout 5000ms\u001b[22m\n\u001b[2m  - waiting for locator('.title')\u001b[22m\n\u001b[2m    14 × locator resolved to <span class=\"title\" data-test=\"title\">Products</span>\u001b[22m\n\u001b[2m       - unexpected value \"Products\"\u001b[22m\n\n    at ProductsPage.expectHeaderTitleNotToHaveText (C:\\Users\\Admin\\IdeaProjects\\New folder\\Autonomous_UI_Test\\tests\\pages\\ProductsPage.ts:29:38)\n    at C:\\Users\\Admin\\IdeaProjects\\New folder\\Autonomous_UI_Test\\tests\\specs\\header-rename.spec.ts:54:26\n    at C:\\Users\\Admin\\IdeaProjects\\New folder\\Autonomous_UI_Test\\tests\\specs\\header-rename.spec.ts:53:5",
+                            "location": {
+                              "file": "C:\\Users\\Admin\\IdeaProjects\\New folder\\Autonomous_UI_Test\\tests\\pages\\ProductsPage.ts",
+                              "column": 38,
+                              "line": 29
+                            },
+                            "snippet": "\u001b[90m   at \u001b[39m..\\pages\\ProductsPage.ts:29\n\n\u001b[0m \u001b[90m 27 |\u001b[39m\n \u001b[90m 28 |\u001b[39m   \u001b[36masync\u001b[39m expectHeaderTitleNotToHaveText(unexpectedText\u001b[33m:\u001b[39m string) {\n\u001b[31m\u001b[1m>\u001b[22m\u001b[39m\u001b[90m 29 |\u001b[39m     \u001b[36mawait\u001b[39m expect(\u001b[36mthis\u001b[39m\u001b[33m.\u001b[39mpageTitle)\u001b[33m.\u001b[39mnot\u001b[33m.\u001b[39mtoHaveText(unexpectedText)\u001b[33m;\u001b[39m\n \u001b[90m    |\u001b[39m                                      \u001b[31m\u001b[1m^\u001b[22m\u001b[39m\n \u001b[90m 30 |\u001b[39m   }\n \u001b[90m 31 |\u001b[39m\n \u001b[90m 32 |\u001b[39m   \u001b[36masync\u001b[39m expectInventoryListVisible() {\u001b[0m"
+                          }
+                        }
+                      ],
+                      "startTime": "2026-09-20T03:48:31.184Z",
+                      "annotations": [],
+                      "attachments": [
+                        {
+                          "name": "screenshot",
+                          "contentType": "image/png",
+                          "path": "C:\\Users\\Admin\\IdeaProjects\\New folder\\Autonomous_UI_Test\\test-results\\header-rename-Header-Renam-be75d-d-Products-header-is-absent-chromium\\test-failed-1.png"
+                        },
+                        {
+                          "name": "video",
+                          "contentType": "video/webm",
+                          "path": "C:\\Users\\Admin\\IdeaProjects\\New folder\\Autonomous_UI_Test\\test-results\\header-rename-Header-Renam-be75d-d-Products-header-is-absent-chromium\\video.webm"
+                        },
+                        {
+                          "name": "error-context",
+                          "contentType": "text/markdown",
+                          "path": "C:\\Users\\Admin\\IdeaProjects\\New folder\\Autonomous_UI_Test\\test-results\\header-rename-Header-Renam-be75d-d-Products-header-is-absent-chromium\\error-context.md"
+                        },
+                        {
+                          "name": "trace",
+                          "contentType": "application/zip",
+                          "path": "C:\\Users\\Admin\\IdeaProjects\\New folder\\Autonomous_UI_Test\\test-results\\header-rename-Header-Renam-be75d-d-Products-header-is-absent-chromium\\trace.zip"
+                        }
+                      ],
+                      "errorLocation": {
+                        "file": "C:\\Users\\Admin\\IdeaProjects\\New folder\\Autonomous_UI_Test\\tests\\pages\\ProductsPage.ts",
+                        "column": 38,
+                        "line": 29
+                      }
+                    }
+                  ],
+                  "status": "unexpected"
+                }
+              ],
+              "id": "b9a8c50310815f099dc8-e2e47808bcf0b7fc615c",
+              "file": "header-rename.spec.ts",
+              "line": 43,
               "column": 3
             }
           ]
@@ -245,10 +725,10 @@
                   "projectName": "chromium",
                   "results": [
                     {
-                      "workerIndex": 2,
-                      "parallelIndex": 2,
+                      "workerIndex": 4,
+                      "parallelIndex": 4,
                       "status": "passed",
-                      "duration": 5119,
+                      "duration": 2342,
                       "errors": [],
                       "stdout": [],
                       "stderr": [],
@@ -256,18 +736,18 @@
                       "steps": [
                         {
                           "title": "Navigate to the login page",
-                          "duration": 3468
+                          "duration": 887
                         },
                         {
                           "title": "Enter valid username, password and click Login",
-                          "duration": 639
+                          "duration": 442
                         },
                         {
                           "title": "Verify redirection to the Products page",
-                          "duration": 258
+                          "duration": 188
                         }
                       ],
-                      "startTime": "2026-09-15T09:45:12.427Z",
+                      "startTime": "2026-09-20T03:48:31.429Z",
                       "annotations": [],
                       "attachments": []
                     }
@@ -293,10 +773,10 @@
                   "projectName": "chromium",
                   "results": [
                     {
-                      "workerIndex": 3,
-                      "parallelIndex": 3,
+                      "workerIndex": 5,
+                      "parallelIndex": 5,
                       "status": "passed",
-                      "duration": 5016,
+                      "duration": 2209,
                       "errors": [],
                       "stdout": [],
                       "stderr": [],
@@ -304,18 +784,18 @@
                       "steps": [
                         {
                           "title": "Navigate to the login page",
-                          "duration": 3469
+                          "duration": 973
                         },
                         {
                           "title": "Enter invalid username, password and click Login",
-                          "duration": 654
+                          "duration": 542
                         },
                         {
                           "title": "Verify error message is displayed and user remains on login page",
-                          "duration": 114
+                          "duration": 130
                         }
                       ],
-                      "startTime": "2026-09-15T09:45:12.346Z",
+                      "startTime": "2026-09-20T03:48:31.634Z",
                       "annotations": [],
                       "attachments": []
                     }
@@ -335,11 +815,11 @@
   ],
   "errors": [],
   "stats": {
-    "startTime": "2026-09-15T09:45:11.683Z",
-    "duration": 6705.07,
-    "expected": 4,
+    "startTime": "2026-09-20T03:48:14.294Z",
+    "duration": 24575.371,
+    "expected": 9,
     "skipped": 0,
-    "unexpected": 0,
+    "unexpected": 2,
     "flaky": 0
   }
 }
