@@ -42,7 +42,6 @@ Hard rules:
 6. Before each tool call, state in one sentence what you're doing and why, so the log is auditable.
 7. Only interact with elements present in your most recent snapshot.`;
 
-// The maximum number of turns (tool calls) allowed per scenario before aborting and reporting a failure. This is a guardrail to prevent infinite loops or excessively long test runs.
 const MAX_TURNS_PER_SCENARIO = 20;
 
 function buildScenarioPrompt(scenario: Scenario, targetUrl: string): string {
