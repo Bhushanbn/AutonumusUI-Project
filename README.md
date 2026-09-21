@@ -498,16 +498,6 @@ notify-rfqa.yml  (on: issues.labeled)
 
 - **Status-field (Projects v2) triggering** — needs a GraphQL query and a
   different CI event type (§7).
-- **`github.token`'s eager validation** — unlike `gemini.apiKey`, any
-  script importing `config.ts` fails immediately if `GITHUB_TOKEN` is
-  missing, even Stages 2–4, which never touch GitHub.
-- **`scenarioParser.ts`'s markdown round-trip** — a more robust
-  alternative (generate scenario data as JSON via `generateJSON()`,
-  render `SCENARIOS.md` forward from that rather than parsing it
-  backward) was discussed but not implemented.
-- **`GEMINI_MODEL`'s value is a moving target** — this project already
-  hit one mid-build model retirement. Treat the current default as
-  provisional.
 - **Free-tier Gemini quota** (as low as 20 requests/day for a given
   model) meaningfully limits how many full pipeline iterations are
   practical per day during active development — a real tradeoff of the
