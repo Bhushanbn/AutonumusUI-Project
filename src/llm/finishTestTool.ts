@@ -1,11 +1,6 @@
 import type { FunctionDeclaration } from "@google/genai";
 
-/**
- * Custom tool used by the execution agent to finish a scenario.
- *
- * Playwright MCP controls the browser.
- * finishTest controls the final PASS/FAIL verdict.
- */
+// FinishTest tool declaration for the Gemini model. This tool is used to end a test scenario with a final verdict, including status, reasoning, and evidence steps.
 export const finishTestDeclaration: FunctionDeclaration = {
   name: "finishTest",
 

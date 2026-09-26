@@ -15,11 +15,7 @@ import type { RfqaIssue } from "../types.js";
 function extractSection(body: string, headerNames: string[]): string | null {
   for (const name of headerNames) {
     const escaped = name.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
-    // Deliberately no "m" flag: with it, "$" matches end-of-line instead of
-    // end-of-string, which truncates the match after the section's first
-    // line whenever nothing else follows. (Learned this the hard way once
-    // already — see git-reader-agent's issueParser.ts from the earlier
-    // TypeScript-only version of this project.)
+// Match a Markdown heading (##, ###, etc.) followed by the section name, and capture everything until the next heading or end of string.
     const pattern = new RegExp(`##\\s*${escaped}\\s*\\n+([\\s\\S]*?)(?=\\n##\\s|$)`);
     const match = body.match(pattern);
     if (match?.[1]) return match[1].trim();
@@ -27,8 +23,7 @@ function extractSection(body: string, headerNames: string[]): string | null {
   return null;
 }
 
-// Extracts the "Acceptance Criteria" section of the issue body and returns
-// it as an array of individual criteria lines, normalized to plain text.
+// Extracts acceptance criteria from the issue body, supporting various formats and bullet points.
 function extractAcceptanceCriteria(body: string): string[] {
   // Find "Acceptance Criteria" anywhere in the issue body.
   // Supports:
@@ -159,14 +154,14 @@ async function resolveIssue(): Promise<RfqaIssue | null> {
   const explicitIssueNumber = process.env.GITHUB_ISSUE_NUMBER
     ? Number(process.env.GITHUB_ISSUE_NUMBER)
     : undefined;
-
+// If an explicit issue number is provided, fetch that issue directly.
   if (explicitIssueNumber) {
     if (!config.github.owner || !config.github.repo) {
       throw new Error("GITHUB_OWNER and GITHUB_REPO must be set to fetch a specific issue.");
     }
     return getIssue(config.github.owner, config.github.repo, explicitIssueNumber);
   }
-
+// Otherwise, list open issues and find the first one with the RFQA label.
   if (!config.github.owner || !config.github.repo) {
     throw new Error("GITHUB_OWNER and GITHUB_REPO are required (no issue number given to fetch directly).");
   }
@@ -183,11 +178,7 @@ export async function runGitReaderAgent(): Promise<RfqaIssue | null> {
     console.log("No RFQA issue found (checked open issues for an RFQA/Ready for QA label). Nothing to do.");
     return null;
   }
-
-  // Explicit gate, applied regardless of which path in resolveIssue() found
-  // this issue — a direct-by-number fetch has no built-in RFQA filtering,
-  // so without this check, GITHUB_ISSUE_NUMBER pointing at a non-RFQA issue
-  // would silently write plan.md for it anyway.
+// If the issue is not in RFQA status, log and exit without writing plan.md.
   if (!isReadyForQA(issue)) {
     console.log(`Issue #${issue.number} is not RFQA yet (status: "${issue.status}"). Nothing written.`,);
     return null;
@@ -199,7 +190,7 @@ export async function runGitReaderAgent(): Promise<RfqaIssue | null> {
   const notes = extractSection(issue.body, ["Notes / Constraints", "Notes for QA", "Notes"])
     ?? "None explicitly stated in the issue.";
 
-    // Write plan.md with the extracted sections and acceptance criteria.
+    // combines the section ,Write plan.md with the extracted sections and acceptance criteria.
   writeFileSync("plan.md", renderPlanMarkdown(issue, criteria, userStory, notes));
   console.log(`Wrote plan.md with ${criteria.length} acceptance criteria.`);
   return issue;

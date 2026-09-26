@@ -23,6 +23,7 @@ export interface Scenario {
  *   1. Inventory page is displayed
  * - Linked Acceptance Criteria: AC1 — "..."
  */
+
 export function parseScenarios(markdown: string): Scenario[] {
   const blocks = markdown.split(/^### /m).slice(1);
 
@@ -69,6 +70,7 @@ export function parseScenarios(markdown: string): Scenario[] {
       );
     }
 
+    // Add the parsed scenario to the array.
     scenarios.push({
       id,
       title: title.trim(),

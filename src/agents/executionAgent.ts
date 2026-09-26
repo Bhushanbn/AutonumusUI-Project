@@ -10,12 +10,16 @@ async function main() {
   if (!existsSync("SCENARIOS.md")) {
     throw new Error("SCENARIOS.md not found — run agent:plan first.");
   }
+  // Load and parse the scenarios from SCENARIOS.md, throwing an error if none are found.
   const scenarios = parseScenarios(readFileSync("SCENARIOS.md", "utf-8"));
   console.log(`Loaded ${scenarios.length} scenario(s) from SCENARIOS.md.`);
 
+  // Initialize the EvidenceLogger to record the execution trail and connect to the Playwright MCP for browser automation.
   const logger = new EvidenceLogger();
+  // Connect to the Playwright MCP (Message Control Protocol) to control the browser for executing scenarios.
   const mcp = await connectPlaywrightMcp();
 
+  // Run each scenario in sequence, logging thoughts, tool calls, results, and verdicts. Ensure a fresh browser page for each scenario to avoid state contamination.
   try {
     for (const scenario of scenarios) {
       console.log(`\n▶ Executing ${scenario.id}: ${scenario.title}`);

@@ -6,6 +6,7 @@ import type { RfqaIssue } from "../types.js";
 
 let clientPromise: Promise<Client> | undefined;
 
+/// Lazily creates and returns a GitHub MCP client, reusing the same instance
 function getClient(): Promise<Client> {
   if (!clientPromise) {
     clientPromise = (async () => {
@@ -25,6 +26,7 @@ function getClient(): Promise<Client> {
   return clientPromise;
 }
 
+// Calls a GitHub MCP tool by name with the given arguments, returning the parsed JSON result
 async function callTool<T>(name: string, args: Record<string, unknown>): Promise<T> {
   const client = await getClient();
   const result = await client.callTool({ name, arguments: args });
@@ -52,6 +54,7 @@ export function parseIssueUrlParam(issueParam: string): {
   return { owner, repo, number: Number(numberStr) };
 }
 
+/// Tool result types
 interface GitHubIssueToolResult {
   title: string;
   html_url: string;
@@ -103,6 +106,7 @@ export async function listRfqaIssues(owner: string, repo: string): Promise<RfqaI
     state: "open",
   });
 
+  // Filter for issues with an "RFQA" or "Ready for QA" label, and map to RfqaIssue objects
   return result.issues
     .filter((issue) =>
       (issue.labels ?? []).some((l) => {
@@ -124,6 +128,7 @@ export async function listRfqaIssues(owner: string, repo: string): Promise<RfqaI
     }));
 }
 
+/// Closes the GitHub MCP client, if it was created, and resets the cached promise
 export async function closeGithubClient(): Promise<void> {
   if (clientPromise) {
     const client = await clientPromise;
