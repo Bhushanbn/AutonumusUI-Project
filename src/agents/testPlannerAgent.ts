@@ -49,12 +49,14 @@ export async function runTestPlannerAgent(): Promise<void> {
     throw new Error('plan.md has no "## Acceptance Criteria" section — run gitReaderAgent first.');
   }
 
+  // Call Gemini to generate structured test scenarios from the Acceptance Criteria in plan.md.
   console.log("Generating test scenarios from plan.md via Gemini...");
   const scenarios = await generateText({
     systemInstruction: SYSTEM_INSTRUCTION,
     prompt: planContent,
   });
 
+  // Write the generated scenarios to SCENARIOS.md, ensuring a trailing newline for proper formatting.
   writeFileSync("SCENARIOS.md", scenarios.trim() + "\n");
   const scenarioCount = (scenarios.match(/^### AC\d+-S\d+:/gm) ?? []).length;
   console.log(`Wrote SCENARIOS.md with ${scenarioCount} scenario(s).`);

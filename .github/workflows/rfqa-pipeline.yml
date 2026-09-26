@@ -59,6 +59,10 @@ jobs:
       - name: Generate and run Playwright tests
         run: npm run agent:generate
 
+      - name: Run live executionAgent (Stage 4)
+        if: always()
+        run: npm run agent:execute
+        
       - name: Run full test suite and build reports
         if: always()
         run: npm test

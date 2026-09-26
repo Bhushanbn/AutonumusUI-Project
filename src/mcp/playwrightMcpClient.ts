@@ -17,6 +17,8 @@ let client: Client | undefined;
 let transport: StdioClientTransport | undefined;
 
 // Connects to the Playwright MCP server (spawns it if needed) and returns a ready-to-use Client instance.
+// Playwright MCP Client provides browser-control tools to the execution loop.
+
 export async function connectPlaywrightMcp(): Promise<Client> {
   if (client) return client;
 
@@ -36,15 +38,7 @@ export async function disconnectPlaywrightMcp(): Promise<void> {
   transport = undefined;
 }
 
-/**
- * Converts the MCP server's advertised tools into Gemini function declarations. 
- * The key fact that makes this trivial: FunctionDeclarationhas a `parametersJsonSchema` field that accepts a raw JSON Schema object
- * directly — MCP tool schemas already ARE JSON Schema, so this is a
- * pass-through, not a translation. (Google's OTHER field, `parameters`,
- * wants their own OpenAPI-flavored `Schema` type with a `Type.OBJECT` enum
- * — that's the one you'd need a real converter for. Don't use that one
- * here.)
- */
+// Retrieves the list of available Playwright MCP tools and converts them into FunctionDeclaration objects for use with the Gemini model.
 export async function getPlaywrightToolDeclarations(mcp: Client): Promise<FunctionDeclaration[]> {
   const { tools } = await mcp.listTools();
   return tools.map((tool) => ({
@@ -54,7 +48,7 @@ export async function getPlaywrightToolDeclarations(mcp: Client): Promise<Functi
   }));
 }
 
-/** Executes one MCP tool call and returns its result content as plain text/data for logging + feeding back to Gemini. */
+// Calls a Playwright MCP tool with the given name and arguments, returning the result formatted for the model along with an optional screenshot in base64 format.
 export async function callPlaywrightTool(
   mcp: Client,
   name: string,

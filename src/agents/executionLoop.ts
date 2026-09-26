@@ -58,6 +58,7 @@ Linked Acceptance Criterion: ${scenario.linkedAc}
 Start by navigating to the target URL (or taking a snapshot first if you have reason to believe you're already on the right page).`;
 }
 
+// Creates a Content object representing the scenario prompt for the model.
 export async function runScenario(
   mcp: Client,
   scenario: Scenario,
@@ -66,6 +67,7 @@ export async function runScenario(
   const genAI = getGeminiClient();
   const mcpDeclarations = await getPlaywrightToolDeclarations(mcp);
 
+  // The execution loop maintains a conversation with the model, sending it the scenario prompt and any subsequent tool call results, and receiving its next action or verdict. It enforces turn limits and guards against repeated identical actions.
   const contents: Content[] = [createUserContent(buildScenarioPrompt(scenario, config.app.baseUrl))];
 
   let lastCallSignature = "";

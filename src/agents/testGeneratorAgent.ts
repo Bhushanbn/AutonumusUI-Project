@@ -83,7 +83,7 @@ export async function runTestGeneratorAgent(): Promise<void> {
   const scenarios = readFileSync("SCENARIOS.md", "utf-8");
   const plan = existsSync("plan.md") ? readFileSync("plan.md", "utf-8") : "";
   const existingPages = readExistingPageObjects();
-
+// The base prompt for Gemini, including the target application URL, plan.md content, SCENARIOS.md content, and existing Page Objects for reuse.
   const basePrompt = `Target application base URL: ${config.app.baseUrl}
 
 ## plan.md (acceptance criteria wording — pass/fail must reflect this)
@@ -100,6 +100,7 @@ ${existingPages}`;
   let files = parseGeneratedFiles(raw);
   writeGeneratedFiles(files);
 
+  // Run Playwright on the generated spec files, and if any fail, ask Gemini to diagnose and fix them, repeating up to MAX_FIX_ITERATIONS times.
   const specPaths = files.filter((f) => f.path.includes("tests/specs/")).map((f) => f.path);
   if (specPaths.length === 0) {
     throw new Error("Gemini's output didn't include any tests/specs/*.spec.ts file.");
@@ -124,7 +125,7 @@ ${existingPages}`;
       process.exitCode = 1;
       return;
     }
-
+// If tests failed, ask Gemini to diagnose and fix them, providing the previous attempt's generated files and Playwright output for context.
     console.log("Failure detected — asking Gemini to diagnose and fix (not to weaken assertions)...");
     const fixPrompt = `${basePrompt}
 
@@ -139,6 +140,7 @@ Diagnose the failure: is this a locator problem, a timing/race issue, or a wrong
     raw = await generateText({ systemInstruction: SYSTEM_INSTRUCTION, prompt: fixPrompt });
     const fixedFiles = parseGeneratedFiles(raw);
     writeGeneratedFiles(fixedFiles);
+    // Update the files array with the fixed files, replacing existing ones or adding new ones as needed.
     for (const f of fixedFiles) {
       const idx = files.findIndex((existing) => existing.path === f.path);
       if (idx >= 0) files[idx] = f;
@@ -146,7 +148,7 @@ Diagnose the failure: is this a locator problem, a timing/race issue, or a wrong
     }
   }
 }
-
+// The entry point for the testGeneratorAgent script: runs the main logic and handles error reporting.
 runTestGeneratorAgent().catch((err) => {
   console.error("testGeneratorAgent failed:", err.message ?? err);
   process.exit(1);
